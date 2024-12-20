@@ -1,6 +1,6 @@
 # Web Speech API
 
-This is the source for the [Web Speech API](https://w3c.github.io/speech-api/) spec.
+This is the source for the [Web Speech API](https://webaudio.github.io/web-speech-api/) spec.
 
 ## Tests
 
