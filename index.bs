@@ -1,8 +1,9 @@
 <pre class='metadata'>
 Title: Web Speech API
 Level:
-Status: CG-DRAFT
-Group: Audio Working Group
+Status: WD
+Group: audiowg
+TR:
 URL: https://webaudio.github.io/web-speech-api/
 Repository: WebAudio/web-speech-api
 Shortname: speech-api
@@ -118,6 +119,8 @@ This does not preclude adding support for this as a future API enhancement, and 
   </li>
 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
+
+  <li>User agents must obtain explicit and informed user consent before installing on-device speech recognition languages that differ from the user's preferred language or when the user is not connected to an Ethernet or Wi-Fi network.</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -155,12 +158,15 @@ interface SpeechRecognition : EventTarget {
     attribute boolean continuous;
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
+    attribute SpeechRecognitionMode mode;
 
     // methods to drive the speech interaction
     undefined start();
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
+    boolean onDeviceWebSpeechAvailable(DOMString lang);
+    boolean installOnDeviceSpeechRecognition(DOMString lang);
 
     // event methods
     attribute EventHandler onaudiostart;
@@ -185,6 +191,12 @@ enum SpeechRecognitionErrorCode {
     "service-not-allowed",
     "bad-grammar",
     "language-not-supported"
+};
+
+enum SpeechRecognitionMode {
+    "ondevice-preferred", // On-device speech recognition if available, otherwise use Cloud speech recognition as a fallback.
+    "ondevice-only", // On-device speech recognition only. Returns an error if on-device speech recognition is not available.
+    "cloud-only", // Cloud speech recognition only.
 };
 
 [Exposed=Window]
@@ -282,6 +294,9 @@ interface SpeechGrammarList {
   <dt><dfn attribute for=SpeechRecognition>maxAlternatives</dfn> attribute</dt>
   <dd>This attribute will set the maximum number of {{SpeechRecognitionAlternative}}s per result.
   The default value is 1.</dd>
+
+  <dt><dfn attribute for=SpeechRecognition>mode</dfn> attribute</dt>
+  <dd>An enum to determine where speech recognition takes place. The default value is "ondevice-preferred".</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
@@ -312,6 +327,13 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   When the abort method is called, the speech service must stop recognizing.
   The user agent must raise an <a event for=SpeechRecognition>end</a> event once the speech service is no longer connected.
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
+
+  <dt><dfn method for=SpeechRecognition>onDeviceWebSpeechAvailable({{DOMString}} lang)</dfn> method</dt>
+  <dd>The onDeviceWebSpeechAvailable method returns a boolean indicating whether on-device speech recognition is available for a given BCP 47 language tag. [[!BCP47]] The method returns true if on-device speech recognition is available for the given BCP 47 language tag and false otherwise.</dd>
+
+  <dt><dfn method for=SpeechRecognition>installOnDeviceSpeechRecognition({{DOMString}} lang)</dfn> method</dt>
+  <dd>The installOnDeviceSpeechRecognition method returns a boolean indicating whether the installation of on-device speech recognition for a given BCP 47 language tag initiated successfully. [[!BCP47]] Any website can automatically trigger a download of a new language pack if the user is connected to ethernet/Wifi and the language pack matches the user's preferred language. All sites must prompt the user if they wish to trigger a download over a cellular network or a language pack that does not match the user's preferred language.</dd>
+
 </dl>
 
 <h4 id="speechreco-events">SpeechRecognition Events</h4>
