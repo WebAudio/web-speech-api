@@ -311,7 +311,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   If the start method is called on an already started object (that is, start has previously been called, and no <a event for=SpeechRecognition>error</a> or <a event for=SpeechRecognition>end</a> event has fired on the object), the user agent must throw an "{{InvalidStateError!!exception}}" {{DOMException}} and ignore the call.</dd>
 
   <dt><dfn method for=SpeechRecognition>start({{MediaStreamTrack}} audioTrack)</dfn> method</dt>
-  <dd>The overloaded start method does the same thing as the parameterless start method except it performs speech recognition on provided {{MediaStreamTrack}} instead of the input media stream. If the {{MediaStreamTrack/kind}} attribute of the {{MediaStreamTrack}} is not "audio" or the {{MediaStreamTrack/readyState}} attribute is not "live",  the user agent must throw an "{{InvalidStateError!!exception}}" {{DOMException}} and ignore the call.</dd>
+  <dd>The overloaded start method does the same thing as the parameterless start method except it performs speech recognition on provided {{MediaStreamTrack}} instead of the input media stream. If the {{MediaStreamTrack/kind}} attribute of the {{MediaStreamTrack}} is not "audio", the user agent must throw an "{{InvalidStateError!!exception}}" {{DOMException}} and ignore the call.</dd>
 
   <dt><dfn method for=SpeechRecognition>stop()</dfn> method</dt>
   <dd>The stop method represents an instruction to the recognition service to stop listening to more audio, and to try and return a result using just the audio that it has already received for this recognition.
