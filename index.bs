@@ -323,8 +323,8 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   <dt><dfn method for=SpeechRecognition>start({{MediaStreamTrack}} audioTrack)</dfn> method</dt>
   <dd>
     1. Let <var>audioTrack</var> be the first argument.
-    1. If the <var>audioTrack</var>'s {{MediaStreamTrack/kind}} attribute is NOT <code>"audio"</code>, throw an {{InvalidStateError}} and abort these steps.
-    1. If the <var>audioTrack</var>'s {{MediaStreamTrack/readyState}} attribute is NOT <code>"live"</code>, throw an {{InvalidStateError}} and abort these steps.
+    1. If <var>audioTrack</var>'s {{MediaStreamTrack/kind}} attribute is NOT <code>"audio"</code>, throw an {{InvalidStateError}} and abort these steps.
+    1. If <var>audioTrack</var>'s {{MediaStreamTrack/readyState}} attribute is NOT <code>"live"</code>, throw an {{InvalidStateError}} and abort these steps.
     1. Let <var>requestMicrophonePermission</var> be <code>false</code>.
     1. Run the <a>start session algorithm</a> with <var>requestMicrophonePermission</var>.
   </dd>
