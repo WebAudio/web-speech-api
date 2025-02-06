@@ -316,16 +316,17 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 <dl>
   <dt><dfn method for=SpeechRecognition>start()</dfn> method</dt>
   <dd>
-    1. Let |requestMicrophonePermission| to <code>true</code>.
-    1. Run the <a>start session algorithm</a> with |requestMicrophonePermission|.
+    1. Let <var>requestMicrophonePermission</var> to <code>true</code>.
+    1. Run the <a>start session algorithm</a> with <var>requestMicrophonePermission</var>.
   </dd>
 
   <dt><dfn method for=SpeechRecognition>start({{MediaStreamTrack}} audioTrack)</dfn> method</dt>
   <dd>
-    1. If the {{MediaStreamTrack/kind}} attribute of the {{MediaStreamTrack}} is NOT <code>"audio"</code>, throw an {{InvalidStateError}} and abort these steps.
-    1. If the {{MediaStreamTrack/readyState}} attribute is NOT <code>"live"</code>, throw an {{InvalidStateError}} and abort these steps.
-    1. Let |requestMicrophonePermission| be <code>false</code>.
-    1. Run the <a>start session algorithm</a> with |requestMicrophonePermission|.
+    1. Let <var>audioTrack</var> be the first argument.
+    1. If the <var>audioTrack</var>'s {{MediaStreamTrack/kind}} attribute is NOT <code>"audio"</code>, throw an {{InvalidStateError}} and abort these steps.
+    1. If the <var>audioTrack</var>'s {{MediaStreamTrack/readyState}} attribute is NOT <code>"live"</code>, throw an {{InvalidStateError}} and abort these steps.
+    1. Let <var>requestMicrophonePermission</var> be <code>false</code>.
+    1. Run the <a>start session algorithm</a> with <var>requestMicrophonePermission</var>.
   </dd>
 
   <dt><dfn method for=SpeechRecognition>stop()</dfn> method</dt>
@@ -350,12 +351,12 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
 </dl>
 
-<p>When the <dfn>start session algorithm</dfn> with |requestMicrophonePermission| is invoked, the user agent MUST run the following steps:
+<p>When the <dfn>start session algorithm</dfn> with <var>requestMicrophonePermission</var> is invoked, the user agent MUST run the following steps:
 
 1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{UnknownError}} and abort these steps.
 1. If {{[[started]]}} is <code>true</code> and no <a event for=SpeechRecognition>error</a> or <a event for=SpeechRecognition>end</a> event has fired, throw an {{InvalidStateError}} and abort these steps.
 1. Set {{[[started]]}} to <code>true</code>.
-1. If |requestMicrophonePermission| is <code>true</code> and [=request permission to use=] "<code>microphone</code>" is [=permission/"denied"=], abort these steps.
+1. If <var>requestMicrophonePermission</var> is <code>true</code> and [=request permission to use=] "<code>microphone</code>" is [=permission/"denied"=], abort these steps.
 1. Once the system is successfully listening to the recognition, [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
 </p>
