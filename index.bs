@@ -1006,6 +1006,7 @@ These events do not bubble and are not cancelable.
   Marcos Cáceres (Mozilla)
   Nagesh Kharidi (Openstream)
   Olli Pettay (Mozilla)
+  Paul Adenot (Mozilla)
   Peter Beverloo (Google)
   Raj Tumuluri (Openstream)
   Satish Sampath (Google)
