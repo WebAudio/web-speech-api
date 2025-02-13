@@ -71,9 +71,7 @@ This subset does not preclude future standardization of additions to the markup,
 <ul>
   <li>Voice Web Search</li>
   <li>Speech Command Interface</li>
-  <li>Domain Specific Grammars Contingent on Earlier Inputs</li>
   <li>Continuous Recognition of Open Dialog</li>
-  <li>Domain Specific Grammars Filling Multiple Input Fields</li>
   <li>Speech UI present when no visible UI need be present</li>
   <li>Voice Activity Detection</li>
   <li>Temporal Structure of Synthesis to Provide Visual Feedback</li>
@@ -93,8 +91,6 @@ This does not preclude adding support for this as a future API enhancement, and 
 <ul>
   <li>Rerecognition</li>
 </ul>
-
-<p>Note that for many usages and implementations, it is possible to avoid the need for Rerecognition by using a larger grammar, or by combining multiple grammars &mdash; both of these techniques are supported in this specification.</p>
 
 <h2 id=security>Security and privacy considerations</h2>
 
@@ -162,7 +158,6 @@ interface SpeechRecognition : EventTarget {
     constructor();
 
     // recognition parameters
-    attribute SpeechGrammarList grammars;
     attribute DOMString lang;
     attribute boolean continuous;
     attribute boolean interimResults;
@@ -198,7 +193,6 @@ enum SpeechRecognitionErrorCode {
     "network",
     "not-allowed",
     "service-not-allowed",
-    "bad-grammar",
     "language-not-supported"
 };
 
@@ -254,33 +248,12 @@ dictionary SpeechRecognitionEventInit : EventInit {
     unsigned long resultIndex = 0;
     required SpeechRecognitionResultList results;
 };
-
-// The object representing a speech grammar
-[Exposed=Window]
-interface SpeechGrammar {
-    attribute DOMString src;
-    attribute float weight;
-};
-
-// The object representing a speech grammar collection
-[Exposed=Window]
-interface SpeechGrammarList {
-    constructor();
-    readonly attribute unsigned long length;
-    getter SpeechGrammar item(unsigned long index);
-    undefined addFromURI(DOMString src,
-                    optional float weight = 1.0);
-    undefined addFromString(DOMString string,
-                    optional float weight = 1.0);
-};
 </pre>
 
 
 <h4 id="speechreco-attributes">SpeechRecognition Attributes</h4>
 
 <dl>
-  <dt><dfn attribute for=SpeechRecognition>grammars</dfn> attribute</dt>
-  <dd>The grammars attribute stores the collection of SpeechGrammar objects which represent the grammars that are active for this recognition.</dd>
 
   <dt><dfn attribute for=SpeechRecognition>lang</dfn> attribute</dt>
   <dd>This attribute will set the language of the recognition for the request, using a valid BCP 47 language tag. [[!BCP47]]
@@ -449,9 +422,6 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
     <dt><dfn enum-value for=SpeechRecognitionErrorCode>"service-not-allowed"</dfn></dt>
     <dd>The user agent is not allowing the web application requested speech service, but would allow some speech service, to be used either because the user agent doesn't support the selected one or because of reasons of security, privacy or user preference.</dd>
 
-    <dt><dfn enum-value for=SpeechRecognitionErrorCode>"bad-grammar"</dfn></dt>
-    <dd>There was an error in the speech recognition grammar or semantic tags, or the grammar format or semantic tag format is unsupported.</dd>
-
     <dt><dfn enum-value for=SpeechRecognitionErrorCode>"language-not-supported"</dfn></dt>
     <dd>The language was not supported.</dd>
   </dl>
@@ -530,51 +500,6 @@ For a non-continuous recognition it will hold only a single value.</p>
   All array entries (if any) for indexes equal or greater than resultIndex that were present in the array when the last SpeechRecognitionResultEvent was raised are removed and overwritten with new results.
   The length of the "results" array may increase or decrease, but must not be less than resultIndex.
   Note that when resultIndex equals results.length, no new results are returned, this may occur when the array length decreases to remove one or more interim results.</dd>
-</dl>
-
-<h4 id="speechreco-speechgrammar">SpeechGrammar</h4>
-
-<p>The SpeechGrammar object represents a container for a grammar.</p>
-<p class=issue>The group has discussed options for which grammar formats should be supported, how builtin grammar types are specified, and default grammars when not specified.
-See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Jun/0179.html">Default value of SpeechRecognition.grammars</a> thread on public-speech-api@w3.org.</p>
-<p>This structure has the following attributes:</p>
-
-<dl>
-  <dt><dfn attribute for=SpeechGrammar>src</dfn> attribute</dt>
-  <dd>The required src attribute is the URI for the grammar.
-  Note some services may support builtin grammars that can be specified using a builtin URI scheme.</dd>
-
-  <dt><dfn attribute for=SpeechGrammar>weight</dfn> attribute</dt>
-  <dd>The optional weight attribute controls the weight that the speech recognition service should use with this grammar.
-  By default, a grammar has a weight of 1.
-  Larger weight values positively weight the grammar while smaller weight values make the grammar weighted less strongly.</dd>
-</dl>
-
-<h4 id="speechreco-speechgrammarlist">SpeechGrammarList</h4>
-
-<p>The SpeechGrammarList object represents a collection of SpeechGrammar objects.
-This structure has the following attributes:</p>
-
-<dl>
-  <dt><dfn attribute for=SpeechGrammarList>length</dfn> attribute</dt>
-  <dd>The length attribute represents how many grammars are currently in the array.</dd>
-
-  <dt><dfn method for=SpeechGrammarList>item(<var>index</var>)</dfn> getter</dt>
-  <dd>The item getter returns a SpeechGrammar from the index into an array of grammars.
-  The user agent must ensure that the length attribute is set to the number of elements in the array.
-  The user agent must ensure that the index order from smallest to largest matches the order in which grammars were added to the array.</dd>
-
-  <dt><dfn method for=SpeechGrammarList>addFromURI(<var>src</var>, <var>weight</var>)</dfn> method</dt>
-  <dd>This method appends a grammar to the grammars array parameter based on URI.
-  The URI for the grammar is specified by the <var>src</var> parameter, which represents the URI for the grammar.
-  Note, some services may support builtin grammars that can be specified by URI.
-  The <var>weight</var> parameter represents this grammar's weight relative to the other grammar.
-
-  <dt><dfn method for=SpeechGrammarList>addFromString(<var>string</var>, <var>weight</var>)</dfn> method</dt>
-  <dd>This method appends a grammar to the grammars array parameter based on text.
-  The content of the grammar is specified by the <var>string</var> parameter.
-  This content should be encoded into a data: URI when the SpeechGrammar object is created.
-  The <var>weight</var> parameter represents this grammar's weight relative to the other grammar.
 </dl>
 
 <h3 id="tts-section">The SpeechSynthesis Interface</h3>
