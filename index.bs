@@ -153,7 +153,7 @@ The term "interim result" indicates a SpeechRecognitionResult in which the final
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
     : <dfn>[[started]]</dfn>
     ::
-        A boolean flag representing wether the speech recognition started. The initial value is <code>false</code>.
+        A boolean flag representing whether the speech recognition started. The initial value is <code>false</code>.
 </dl>
 
 <pre class="idl">
