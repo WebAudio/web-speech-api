@@ -116,8 +116,6 @@ This does not preclude adding support for this as a future API enhancement, and 
   </li>
 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
-
-  <li>User agents must obtain explicit and informed user consent before installing on-device speech recognition languages that differ from the user's preferred language or when the user is not connected to an Ethernet or Wi-Fi network.</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -152,7 +150,7 @@ The term "interim result" indicates a SpeechRecognitionResult in which the final
         A boolean flag representing whether the speech recognition started. The initial value is <code>false</code>.
 </dl>
 
-<pre class="idl">
+<xmp class="idl">
 [Exposed=Window]
 interface SpeechRecognition : EventTarget {
     constructor();
@@ -169,8 +167,8 @@ interface SpeechRecognition : EventTarget {
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
-    boolean onDeviceWebSpeechAvailable(DOMString lang);
-    boolean installOnDeviceSpeechRecognition(DOMString lang);
+    static Promise<boolean> availableOnDevice(DOMString lang);
+    static Promise<boolean> installOnDevice(DOMString lang);
 
     // event methods
     attribute EventHandler onaudiostart;
@@ -248,8 +246,7 @@ dictionary SpeechRecognitionEventInit : EventInit {
     unsigned long resultIndex = 0;
     required SpeechRecognitionResultList results;
 };
-</pre>
-
+</xmp>
 
 <h4 id="speechreco-attributes">SpeechRecognition Attributes</h4>
 
@@ -316,11 +313,11 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   The user agent must raise an <a event for=SpeechRecognition>end</a> event once the speech service is no longer connected.
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
 
-  <dt><dfn method for=SpeechRecognition>onDeviceWebSpeechAvailable({{DOMString}} lang)</dfn> method</dt>
-  <dd>The onDeviceWebSpeechAvailable method returns a boolean indicating whether on-device speech recognition is available for a given BCP 47 language tag. [[!BCP47]] The method returns true if on-device speech recognition is available for the given BCP 47 language tag and false otherwise.</dd>
+  <dt><dfn method for=SpeechRecognition>availableOnDevice({{DOMString}} lang)</dfn> method</dt>
+  <dd>The availableOnDevice method returns a Promise that resolves to a boolean indicating whether on-device speech recognition is available for a given BCP 47 language tag. [[!BCP47]]</dd>
 
-  <dt><dfn method for=SpeechRecognition>installOnDeviceSpeechRecognition({{DOMString}} lang)</dfn> method</dt>
-  <dd>The installOnDeviceSpeechRecognition method returns a boolean indicating whether the installation of on-device speech recognition for a given BCP 47 language tag initiated successfully. [[!BCP47]] Any website can automatically trigger a download of a new language pack if the user is connected to ethernet/Wifi and the language pack matches the user's preferred language. All sites must prompt the user if they wish to trigger a download over a cellular network or a language pack that does not match the user's preferred language.</dd>
+  <dt><dfn method for=SpeechRecognition>installOnDevice({{DOMString}} lang)</dfn> method</dt>
+  <dd>The installOnDevice method returns a Promise that resolves to a boolean indicating whether the installation of on-device speech recognition for a given BCP 47 language tag initiated successfully. [[!BCP47]]</dd>
 
 </dl>
 
