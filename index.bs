@@ -162,6 +162,7 @@ interface SpeechRecognition : EventTarget {
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
     attribute SpeechRecognitionMode mode;
+    attribute SpeechRecognitionContext context;
 
     // methods to drive the speech interaction
     undefined start();
@@ -192,7 +193,8 @@ enum SpeechRecognitionErrorCode {
     "network",
     "not-allowed",
     "service-not-allowed",
-    "language-not-supported"
+    "language-not-supported",
+    "context-not-supported"
 };
 
 enum SpeechRecognitionMode {
@@ -254,6 +256,30 @@ dictionary SpeechRecognitionEventInit : EventInit {
     unsigned long resultIndex = 0;
     required SpeechRecognitionResultList results;
 };
+
+// The object representing a phrase for contextual biasing.
+[Exposed=Window]
+interface SpeechRecognitionPhrase {
+    constructor(DOMString phrase, optional float boost = 1.0);
+    readonly attribute DOMString phrase;
+    readonly attribute float boost;
+};
+
+// The object representing a list of biasing phrases.
+[Exposed=Window]
+interface SpeechRecognitionPhraseList {
+    constructor();
+    readonly attribute unsigned long length;
+    SpeechRecognitionPhrase item(unsigned long index);
+    undefined addItem(SpeechRecognitionPhrase item);
+};
+
+// The object representing a recognition context collection.
+[Exposed=Window]
+interface SpeechRecognitionContext {
+    constructor(SpeechRecognitionPhraseList phrases);
+    readonly attribute SpeechRecognitionPhraseList phrases;
+};
 </xmp>
 
 <h4 id="speechreco-attributes">SpeechRecognition Attributes</h4>
@@ -284,6 +310,9 @@ dictionary SpeechRecognitionEventInit : EventInit {
 
   <dt><dfn attribute for=SpeechRecognition>mode</dfn> attribute</dt>
   <dd>An enum to determine where speech recognition takes place. The default value is "ondevice-preferred".</dd>
+
+  <dt><dfn attribute for=SpeechRecognition>context</dfn> attribute</dt>
+  <dd>This attribute will set the speech recognition context for the recognition session to start with.</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
@@ -328,6 +357,17 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   When the abort method is called, the speech service must stop recognizing.
   The user agent must raise an <a event for=SpeechRecognition>end</a> event once the speech service is no longer connected.
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
+
+  <dt><dfn method for=SpeechRecognition>updateContext({{SpeechRecognitionContext}} |context|)</dfn> method</dt>
+  <dd>
+    The updateContext method updates the speech recognition context after the speech recognition session has started.
+    If the session has not started yet, user should update {{SpeechRecognition/context}} instead of using this method.
+
+    When invoked, run the following steps:
+    1. If {{[[started]]}} is <code>false</code>, throw an {{InvalidStateError}} and abort these steps.
+    1. If the system does not support speech recognition context, throw a {{SpeechRecognitionErrorEvent}} with the {{context-not-supported}} error code and abort these steps.
+    1. The system updates its speech recognition context to be |context|.
+  </dd>
 
   <dt><dfn method for=SpeechRecognition>availableOnDevice({{DOMString}} lang)</dfn> method</dt>
   <dd>
@@ -386,6 +426,9 @@ following steps:
 1. If |requestMicrophonePermission| is `true` and [=request
     permission to use=] "`microphone`" is [=permission/"denied"=], abort
     these steps.
+1. If {{SpeechRecognition/context}} is not null and the system does not support
+    speech recognition context, throw a {{SpeechRecognitionErrorEvent}} with the
+    {{context-not-supported}} error code and abort these steps.
 1. Once the system is successfully listening to the recognition, queue a task to
     [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
@@ -479,6 +522,9 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
 
     <dt><dfn enum-value for=SpeechRecognitionErrorCode>"language-not-supported"</dfn></dt>
     <dd>The language was not supported.</dd>
+
+    <dt><dfn enum-value for=SpeechRecognitionErrorCode>"context-not-supported"</dfn></dt>
+    <dd>The speech recognition model does not support speech recognition context.</dd>
   </dl>
   </dd>
 
@@ -555,6 +601,66 @@ For a non-continuous recognition it will hold only a single value.</p>
   All array entries (if any) for indexes equal or greater than resultIndex that were present in the array when the last SpeechRecognitionResultEvent was raised are removed and overwritten with new results.
   The length of the "results" array may increase or decrease, but must not be less than resultIndex.
   Note that when resultIndex equals results.length, no new results are returned, this may occur when the array length decreases to remove one or more interim results.</dd>
+</dl>
+
+<h4 id="speechreco-phrase">SpeechRecognitionPhrase</h4>
+
+<p>The SpeechRecognitionPhrase object represents a phrase for contextual biasing.</p>
+
+<dl>
+  <dt><dfn constructor for=SpeechRecognitionPhrase>SpeechRecognitionPhrase(|phrase|, |boost|)</dfn> constructor</dt>
+  <dd>
+    When invoked, run the following steps:
+    1. If the |phrase| is an empty string, throw a "{{SyntaxError}}" {{DOMException}}.
+    1. If the |boost| is smaller than 0.0 or greater than 10.0, throw a "{{SyntaxError}}" {{DOMException}}.
+    1. Construct a new SpeechRecognitionPhrase object with |phrase| and |boost|.
+    1. Return the object.
+  </dd>
+
+  <dt><dfn attribute for=SpeechRecognitionPhrase>phrase</dfn> attribute</dt>
+  <dd>This attribute is the text string to be boosted.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionPhrase>boost</dfn> attribute</dt>
+  <dd>This attribute is approximately the natural log of the number of times more likely the website thinks this phrase is than what the speech recognition model knows.
+  A valid boost must be a float value inside the range [0.0, 10.0], with a default value of 1.0 if not specified.
+  A boost of 0.0 means the phrase is not boosted at all, and a higher boost means the phrase is more likely to appear.
+  A boost of 10.0 means the phrase is extremely likely to appear and should be rarely set.
+  </dd>
+</dl>
+
+<h4 id="speechreco-phraselist">SpeechRecognitionPhraseList</h4>
+
+<p>The SpeechRecognitionPhraseList object holds a sequence of phrases for contextual biasing.</p>
+
+<dl>
+  <dt><dfn constructor for=SpeechRecognitionPhraseList>SpeechRecognitionPhraseList()</dfn> constructor</dt>
+  <dd>This constructor returns an empty list.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionPhraseList>length</dfn> attribute</dt>
+  <dd>This attribute indicates how many phrases are in the list. The user agent must ensure it is set to the number of phrases in the list.</dd>
+
+  <dt><dfn method for=SpeechRecognitionPhraseList>SpeechRecognitionPhrase(|index|)</dfn> method</dt>
+  <dd>
+    This method gets the SpeechRecognitionPhrase object at the |index| of the list.
+    When invoked, run the following steps:
+    1. If the |index| is smaller than 0, or greater than or equal to {{SpeechRecognitionPhraseList/length}}, return null.
+    1. Return the SpeechRecognitionPhrase from the |index| of the list.
+  </dd>
+
+  <dt><dfn method for=SpeechRecognitionPhraseList>addItem(|item|)</dfn> method</dt>
+  <dd>This method adds the SpeechRecognitionPhrase object |item| to the end of the list.</dd>
+</dl>
+
+<h4 id="speechreco-context">SpeechRecognitionContext</h4>
+
+<p>The SpeechRecognitionContext object holds contextual information to provide to the speech recognition models.</p>
+
+<dl>
+  <dt><dfn constructor for=SpeechRecognitionContext>SpeechRecognitionContext(|phrases|)</dfn> constructor</dt>
+  <dd>This constructor returns a new SpeechRecognitionContext object with the SpeechRecognitionPhraseList object |phrases| in it.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionContext>phrases</dfn> attribute</dt>
+  <dd>This attribute represents the phrases to be boosted.</dd>
 </dl>
 
 <h3 id="tts-section">The SpeechSynthesis Interface</h3>
