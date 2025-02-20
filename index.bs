@@ -161,12 +161,14 @@ interface SpeechRecognition : EventTarget {
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
     attribute SpeechRecognitionMode mode;
+    attribute SpeechRecognitionContext context;
 
     // methods to drive the speech interaction
     undefined start();
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
+    undefined updateContext(SpeechRecognitionContext context);
     static Promise<boolean> availableOnDevice(DOMString lang);
     static Promise<boolean> installOnDevice(DOMString lang);
 
@@ -191,7 +193,8 @@ enum SpeechRecognitionErrorCode {
     "network",
     "not-allowed",
     "service-not-allowed",
-    "language-not-supported"
+    "language-not-supported",
+    "recognition-context-not-supported"
 };
 
 enum SpeechRecognitionMode {
@@ -246,6 +249,28 @@ dictionary SpeechRecognitionEventInit : EventInit {
     unsigned long resultIndex = 0;
     required SpeechRecognitionResultList results;
 };
+
+// The object representing a biasing phrase.
+[Exposed=Window]
+interface SpeechRecognitionPhrase {
+    // If the phrase is empty or the boost is outside the range [0, 10], throw a "SyntaxError" DOMException.
+    constructor(DOMString phrase, optional float boost = 1.0);
+    attribute DOMString phrase;
+    attribute float boost;
+};
+
+// The object representing a list of biasing phrases.
+[Exposed=Window]
+interface SpeechRecognitionPhraseList {
+    readonly attribute unsigned long length;
+    getter SpeechRecognitionPhrase item(unsigned long index);
+};
+
+// The object representing a recognition context collection.
+[Exposed=Window]
+interface SpeechRecognitionContext {
+    attribute SpeechRecognitionPhraseList phrases;
+};
 </xmp>
 
 <h4 id="speechreco-attributes">SpeechRecognition Attributes</h4>
@@ -276,6 +301,10 @@ dictionary SpeechRecognitionEventInit : EventInit {
 
   <dt><dfn attribute for=SpeechRecognition>mode</dfn> attribute</dt>
   <dd>An enum to determine where speech recognition takes place. The default value is "ondevice-preferred".</dd>
+
+  <dt><dfn attribute for=SpeechRecognition>context</dfn> attribute</dt>
+  <dd>This attribute will set the speech recognition context for the recognition session to start with.
+  If the speech recognition model does not support recognition context, a {{SpeechRecognitionErrorEvent}} with the {{recognition-context-not-supported}} error code will be thrown.</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
@@ -313,12 +342,15 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   The user agent must raise an <a event for=SpeechRecognition>end</a> event once the speech service is no longer connected.
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
 
+  <dt><dfn method for=SpeechRecognition>updateContext({{SpeechRecognitionContext}} context)</dfn> method</dt>
+  <dd>The updateContext method updates the speech recognition context after the speech recognition session has started. If the recognition session is not active when this method is called, throw an {{InvalidStateError}} and abort.
+  If the speech recognition model does not support recognition context, throw a {{SpeechRecognitionErrorEvent}} with the {{recognition-context-not-supported}} error code and abort.</dd>
+
   <dt><dfn method for=SpeechRecognition>availableOnDevice({{DOMString}} lang)</dfn> method</dt>
   <dd>The availableOnDevice method returns a Promise that resolves to a boolean indicating whether on-device speech recognition is available for a given BCP 47 language tag. [[!BCP47]]</dd>
 
   <dt><dfn method for=SpeechRecognition>installOnDevice({{DOMString}} lang)</dfn> method</dt>
   <dd>The installOnDevice method returns a Promise that resolves to a boolean indicating whether the installation of on-device speech recognition for a given BCP 47 language tag initiated successfully. [[!BCP47]]</dd>
-
 </dl>
 
 <p>When the <dfn>start session algorithm</dfn> with <var>requestMicrophonePermission</var> is invoked, the user agent MUST run the following steps:
@@ -421,6 +453,9 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
 
     <dt><dfn enum-value for=SpeechRecognitionErrorCode>"language-not-supported"</dfn></dt>
     <dd>The language was not supported.</dd>
+
+    <dt><dfn enum-value for=SpeechRecognitionErrorCode>"recognition-context-not-supported"</dfn></dt>
+    <dd>The speech recognition model does not support recognition context.</dd>
   </dl>
   </dd>
 
