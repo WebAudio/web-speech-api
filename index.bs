@@ -100,7 +100,7 @@ This does not preclude adding support for this as a future API enhancement, and 
   User consent can include, for example:
   <ul>
     <li>User click on a visible speech input element which has an obvious graphical representation showing that it will start speech input.</li>
-    <li>Accepting a permission prompt shown as the result of a call to <a method for=SpeechRecognition>start()</a>.</li>
+    <li>Accepting a permission prompt shown as the result of a call to {{SpeechRecognition/start()}}.</li>
     <li>Consent previously granted to always allow speech input for this web page.</li>
   </ul>
   </li>
@@ -287,17 +287,25 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 <dl>
   <dt><dfn method for=SpeechRecognition>start()</dfn> method</dt>
   <dd>
-    1. Let <var>requestMicrophonePermission</var> to <code>true</code>.
-    1. Run the <a>start session algorithm</a> with <var>requestMicrophonePermission</var>.
+    Start the speech recognition process, directly from a microphone on the device.
+    When invoked, run the following steps:
+
+    1. Let |requestMicrophonePermission| be a boolan variable set to to `true`.
+    1. Run the [=start session algorithm=] with |requestMicrophonePermission|.
   </dd>
 
   <dt><dfn method for=SpeechRecognition>start({{MediaStreamTrack}} audioTrack)</dfn> method</dt>
   <dd>
-    1. Let <var>audioTrack</var> be the first argument.
-    1. If <var>audioTrack</var>'s {{MediaStreamTrack/kind}} attribute is NOT <code>"audio"</code>, throw an {{InvalidStateError}} and abort these steps.
-    1. If <var>audioTrack</var>'s {{MediaStreamTrack/readyState}} attribute is NOT <code>"live"</code>, throw an {{InvalidStateError}} and abort these steps.
-    1. Let <var>requestMicrophonePermission</var> be <code>false</code>.
-    1. Run the <a>start session algorithm</a> with <var>requestMicrophonePermission</var>.
+    Start the speech recognition process, using a {{MediaStreamTrack}}
+    When invoked, run the following steps:
+
+    1. Let |audioTrack| be the first argument.
+    1. If |audioTrack|'s {{MediaStreamTrack/kind}} attribute is NOT `"audio"`,
+        throw an {{InvalidStateError}} and abort these steps.
+    1. If |audioTrack|'s {{MediaStreamTrack/readyState}} attribute is NOT
+        `"live"`, throw an {{InvalidStateError}} and abort these steps.
+    1. Let |requestMicrophonePermission| be `false`.
+    1. Run the [=start session algorithm=] with |requestMicrophonePermission|.
   </dd>
 
   <dt><dfn method for=SpeechRecognition>stop()</dfn> method</dt>
@@ -322,15 +330,22 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
 </dl>
 
-<p>When the <dfn>start session algorithm</dfn> with <var>requestMicrophonePermission</var> is invoked, the user agent MUST run the following steps:
+When the <dfn>start session algorithm</dfn> with
+|requestMicrophonePermission| is invoked, the user agent MUST run the
+following steps:
 
-1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
-1. If {{[[started]]}} is <code>true</code> and no <a event for=SpeechRecognition>error</a> or <a event for=SpeechRecognition>end</a> event has fired, throw an {{InvalidStateError}} and abort these steps.
-1. Set {{[[started]]}} to <code>true</code>.
-1. If <var>requestMicrophonePermission</var> is <code>true</code> and [=request permission to use=] "<code>microphone</code>" is [=permission/"denied"=], abort these steps.
-1. Once the system is successfully listening to the recognition, [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
-
-</p>
+1. If the [=current settings object=]'s [=relevant global object=]'s
+     [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}}
+     and abort these steps.
+1. If {{[[started]]}} is `true` and no <a event
+     for=SpeechRecognition>error</a> or <a event for=SpeechRecognition>end</a> event
+     have fired, throw an {{InvalidStateError}} and abort these steps.
+1. Set {{[[started]]}} to `true`.
+1. If |requestMicrophonePermission| is `true` and [=request
+    permission to use=] "`microphone`" is [=permission/"denied"=], abort
+    these steps.
+1. Once the system is successfully listening to the recognition, queue a task to
+    [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
 <h4 id="speechreco-events">SpeechRecognition Events</h4>
 
