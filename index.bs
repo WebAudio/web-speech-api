@@ -16,6 +16,7 @@ Former Editor: Hans Wennborg, Google
 Abstract: This specification defines a JavaScript API to enable web developers to incorporate speech recognition and synthesis into their web pages.
 Abstract: It enables developers to use scripting to generate text-to-speech output and to use speech recognition as an input for forms, continuous dictation and control.
 Abstract: The JavaScript API allows web pages to control activation and timing and to handle results and alternatives.
+Markup Shorthands:css no, markdown yes, dfn yes
 </pre>
 
 <pre class=biblio>
