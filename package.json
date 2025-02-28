@@ -1,0 +1,20 @@
+{
+  "name": "web-speech-api",
+  "version": "1.0.0",
+  "description": "This is the source for the [Web Speech API](https://webaudio.github.io/web-speech-api/) spec.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebAudio/web-speech-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WebAudio/web-speech-api/issues"
+  },
+  "homepage": "https://github.com/WebAudio/web-speech-api#readme",
+  "devDependencies": {
+    "vnu-jar": "^24.10.17"
+  }
+}
