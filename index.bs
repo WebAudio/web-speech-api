@@ -17,6 +17,7 @@ Abstract: This specification defines a JavaScript API to enable web developers t
 Abstract: It enables developers to use scripting to generate text-to-speech output and to use speech recognition as an input for forms, continuous dictation and control.
 Abstract: The JavaScript API allows web pages to control activation and timing and to handle results and alternatives.
 Markup Shorthands:css no, markdown yes, dfn yes
+Complain about:accidental-2119 yes, missing-example-ids yes
 </pre>
 
 <pre class=biblio>
@@ -900,7 +901,7 @@ These events do not bubble and are not cancelable.
 
 <h3 id="examples-recognition">Speech Recognition Examples</h3>
 
-<div class="example">
+<div class="example" id="input-field">
   <p>Using speech recognition to fill an input-field and perform a web search.</p>
 
   <pre class="lang-html">
@@ -921,7 +922,7 @@ These events do not bubble and are not cancelable.
   </pre>
 </div>
 
-<div class="example">
+<div class="example" id="fill-option-list">
   <p>Using speech recognition to fill an options list with alternative speech results.</p>
 
   <pre class="lang-html">
@@ -949,7 +950,7 @@ These events do not bubble and are not cancelable.
   </pre>
 </div>
 
-<div class="example">
+<div class="example" id="fill-textarea">
   <p>Using continuous speech recognition to fill a textarea.</p>
 
   <pre class="lang-html">
@@ -990,7 +991,7 @@ These events do not bubble and are not cancelable.
   </pre>
 </div>
 
-<div class="example">
+<div class="example" id="continuous-recognition">
   <p>Using continuous speech recognition, showing final results in black and interim results in grey.</p>
 
   <pre class="lang-html">
@@ -1045,7 +1046,7 @@ These events do not bubble and are not cancelable.
 
 <h3 id="examples-synthesis">Speech Synthesis Examples</h3>
 
-<div class="example">
+<div class="example" id="speak-text">
   <p>Spoken text.</p>
 
   <pre class="lang-html">
@@ -1055,7 +1056,7 @@ These events do not bubble and are not cancelable.
   </pre>
 </div>
 
-<div class="example">
+<div class="example" id="speak-text-advanced">
   <p>Spoken text with attributes and events.</p>
 
   <pre class="lang-html">
