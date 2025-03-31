@@ -324,7 +324,8 @@ interface SpeechRecognitionPhraseList {
     The setter steps are:
     1. If the {{SpeechRecognitionPhraseList/length}} of {{SpeechRecognition/phrases}} is greater than 0
         and the system using the given value for {{SpeechRecognition/[[mode]]}} does not support contextual biasing,
-        throw a {{SpeechRecognitionErrorEvent}} with the {{SpeechRecognitionErrorCode/not-allowed}} error code and abort these steps.
+        throw a {{SpeechRecognitionErrorEvent}} with the {{SpeechRecognitionErrorCode/phrases-not-supported}}
+        error code and abort these steps.
     1. Set {{SpeechRecognition/[[mode]]}} to the given value.
   </dd>
 
@@ -642,7 +643,6 @@ For a non-continuous recognition it will hold only a single value.</p>
   <dt><dfn constructor for=SpeechRecognitionPhrase>SpeechRecognitionPhrase(|phrase|, |boost|)</dfn> constructor</dt>
   <dd>
     When this constructor is invoked, run the following steps:
-    1. If |phrase| is an empty string, throw a {{SyntaxError}} and abort these steps.
     1. If |boost| is smaller than 0.0 or greater than 10.0, throw a {{SyntaxError}} and abort these steps.
     1. Let |phr| be a new object of type {{SpeechRecognitionPhrase}}.
     1. Set |phr|.{{[[phrase]]}} to be the value of |phrase|.
@@ -659,12 +659,12 @@ For a non-continuous recognition it will hold only a single value.</p>
 
 <h4 id="speechreco-phraselist">SpeechRecognitionPhraseList</h4>
 
-<p>The SpeechRecognitionPhraseList object holds a sequence of phrases for contextual biasing and has the following internal slot:</p>
+<p>The SpeechRecognitionPhraseList object holds a list of phrases for contextual biasing and has the following internal slot:</p>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognitionPhraseList">
     : <dfn>[[phrases]]</dfn>
     ::
-        A sequence of {{SpeechRecognitionPhrase}} representing the phrases to be boosted. The initial value is an empty list.
+        A list of {{SpeechRecognitionPhrase}} representing the phrases to be boosted. The initial value is an empty list.
 </dl>
 
 <dl>
