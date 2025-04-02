@@ -23,13 +23,13 @@ Applications can offer speech recognition capabilities even without an active in
 
 ## New Methods
 
-### 1. `Promise<boolean> onDeviceWebSpeechAvailable(DOMString lang)`
+### 1. `Promise<boolean> availableOnDevice(DOMString lang)`
 This method checks if on-device speech recognition is available for a specific language. Developers can use this to determine whether to enable on-device features or fall back to cloud-based recognition.
 
 #### Example Usage
 ```javascript
 const lang = 'en-US';
-SpeechRecognition.onDeviceWebSpeechAvailable(lang).then((available) => {
+SpeechRecognition.availableOnDevice(lang).then((available) => {
     if (available) {
         console.log(`On-device speech recognition is available for ${lang}.`);
     } else {
@@ -38,15 +38,18 @@ SpeechRecognition.onDeviceWebSpeechAvailable(lang).then((available) => {
 });
 ```
 
-### 2. `Promise<boolean> installOnDeviceSpeechRecognition()`
-This method initiates the installation of resources required for on-device speech recognition. The installation process may download and configure necessary language models.
+### 2. `Promise<boolean> installOnDevice()`
+This method install the resources required for on-device speech recognition. The installation process may download and configure necessary language models.
 
 #### Example Usage
 ```javascript
-SpeechRecognition.installOnDeviceSpeechRecognition().then(() => {
-    console.log('Installation of on-device speech recognition resources initiated successfully.');
-}).catch((error) => {
-    console.error('Unable to install on-device speech recognition:', error);
+const lang = 'en-US';
+SpeechRecognition.installOnDevice(lang).then((success) => {
+    if (success) {
+        console.log('On-device speech recognition resources installed successfully.');
+    } else {
+        console.error('Unable to install on-device speech recognition.');
+    }
 });
 ```
 
