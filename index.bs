@@ -627,6 +627,7 @@ For a non-continuous recognition it will hold only a single value.</p>
     : <dfn>[[phrase]]</dfn>
     ::
         A {{DOMString}} representing the text string to be boosted. The initial value is null.
+        An empty value is allowed but should be ignored by the speech recognition model.
 </dl>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognitionPhrase">
@@ -695,6 +696,9 @@ For a non-continuous recognition it will hold only a single value.</p>
   <dd>
     This method adds the {{SpeechRecognitionPhrase}} object |item| to the list.
     When invoked, add |item| to the end of {{SpeechRecognitionPhraseList/[[phrases]]}}.
+    The list is allowed to have multiple {{SpeechRecognitionPhrase}} objects with the same {{SpeechRecognitionPhrase/[[phrase]]}} value,
+    and the speech recognition model should use the last {{SpeechRecognitionPhrase/[[boost]]}} value
+    for this {{SpeechRecognitionPhrase/[[phrase]]}} in the list.
   </dd>
 
   <dt><dfn method for=SpeechRecognitionPhraseList>removeItem(|index|)</dfn> method</dt>
