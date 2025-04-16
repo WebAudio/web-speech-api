@@ -151,6 +151,18 @@ The term "interim result" indicates a SpeechRecognitionResult in which the final
         A boolean flag representing whether the speech recognition started. The initial value is <code>false</code>.
 </dl>
 
+<dl dfn-type=attribute dfn-for="SpeechRecognition">
+    : <dfn>[[mode]]</dfn>
+    ::
+        A {{SpeechRecognitionMode}} enum to determine where speech recognition takes place. The initial value is <code>ondevice-preferred</code>.
+</dl>
+
+<dl dfn-type=attribute dfn-for="SpeechRecognition">
+    : <dfn>[[phrases]]</dfn>
+    ::
+        A {{SpeechRecognitionPhraseList}} representing a list of phrases for contextual biasing. The initial value is null.
+</dl>
+
 <xmp class="idl">
 [Exposed=Window]
 interface SpeechRecognition : EventTarget {
@@ -162,13 +174,14 @@ interface SpeechRecognition : EventTarget {
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
     attribute SpeechRecognitionMode mode;
+    attribute SpeechRecognitionPhraseList phrases;
 
     // methods to drive the speech interaction
     undefined start();
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
-    static Promise<boolean> availableOnDevice(DOMString lang);
+    static Promise<AvailabilityStatus> availableOnDevice(DOMString lang);
     static Promise<boolean> installOnDevice(DOMString lang);
 
     // event methods
@@ -192,13 +205,21 @@ enum SpeechRecognitionErrorCode {
     "network",
     "not-allowed",
     "service-not-allowed",
-    "language-not-supported"
+    "language-not-supported",
+    "phrases-not-supported"
 };
 
 enum SpeechRecognitionMode {
     "ondevice-preferred", // On-device speech recognition if available, otherwise use Cloud speech recognition as a fallback.
     "ondevice-only", // On-device speech recognition only. Returns an error if on-device speech recognition is not available.
     "cloud-only", // Cloud speech recognition only.
+};
+
+enum AvailabilityStatus {
+    "unavailable",
+    "downloadable",
+    "downloading",
+    "available"
 };
 
 [Exposed=Window]
@@ -247,15 +268,32 @@ dictionary SpeechRecognitionEventInit : EventInit {
     unsigned long resultIndex = 0;
     required SpeechRecognitionResultList results;
 };
+
+// The object representing a phrase for contextual biasing.
+[Exposed=Window]
+interface SpeechRecognitionPhrase {
+    constructor(DOMString phrase, optional float boost = 1.0);
+    readonly attribute DOMString phrase;
+    readonly attribute float boost;
+};
+
+// The object representing a list of phrases for contextual biasing.
+[Exposed=Window]
+interface SpeechRecognitionPhraseList {
+    constructor(sequence<SpeechRecognitionPhrase> phrases);
+    readonly attribute unsigned long length;
+    SpeechRecognitionPhrase item(unsigned long index);
+    undefined addItem(SpeechRecognitionPhrase item);
+    undefined removeItem(unsigned long index);
+};
 </xmp>
 
 <h4 id="speechreco-attributes">SpeechRecognition Attributes</h4>
 
 <dl>
-
   <dt><dfn attribute for=SpeechRecognition>lang</dfn> attribute</dt>
   <dd>This attribute will set the language of the recognition for the request, using a valid BCP 47 language tag. [[!BCP47]]
-  If unset it remains unset for getting in script, but will default to use the <a spec=html>language</a> of the html document root element and associated hierarchy.
+  If unset it remains unset for getting in script, but will default to use the language of the html document root element and associated hierarchy.
   This default value is computed and used when the input request opens a connection to the recognition service.</dd>
 
   <dt><dfn attribute for=SpeechRecognition>continuous</dfn> attribute</dt>
@@ -276,7 +314,35 @@ dictionary SpeechRecognitionEventInit : EventInit {
   The default value is 1.</dd>
 
   <dt><dfn attribute for=SpeechRecognition>mode</dfn> attribute</dt>
-  <dd>An enum to determine where speech recognition takes place. The default value is "ondevice-preferred".</dd>
+  <dd>
+   This attribute represents where speech recognition takes place.
+  </dd>
+  <dd>
+    The getter steps are to return the value of {{SpeechRecognition/[[mode]]}}.
+  </dd>
+  <dd>
+    The setter steps are:
+    1. If the {{SpeechRecognitionPhraseList/length}} of {{SpeechRecognition/phrases}} is greater than 0
+        and the system using the given value for {{SpeechRecognition/[[mode]]}} does not support contextual biasing,
+        throw a {{SpeechRecognitionErrorEvent}} with the {{SpeechRecognitionErrorCode/phrases-not-supported}}
+        error code and abort these steps.
+    1. Set {{SpeechRecognition/[[mode]]}} to the given value.
+  </dd>
+
+  <dt><dfn attribute for=SpeechRecognition>phrases</dfn> attribute</dt>
+  <dd>
+    This attribute represents a list of phrases for contextual biasing.
+  </dd>
+  <dd>
+    The getter steps are to return the value of {{SpeechRecognition/[[phrases]]}}.
+  </dd>
+  <dd>
+    The setter steps are:
+    1. If the {{SpeechRecognitionPhraseList/length}} of the given value is greater than 0 and the system does not support contextual biasing,
+        throw a {{SpeechRecognitionErrorEvent}} with the {{phrases-not-supported}} error code and abort these steps.
+    1. Set {{SpeechRecognition/[[phrases]]}} to the given value.
+    1. Send a copy of {{SpeechRecognition/[[phrases]]}} to the system for initializing or updating the phrases for contextual biasing implementation.
+  </dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
@@ -323,12 +389,47 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
 
   <dt><dfn method for=SpeechRecognition>availableOnDevice({{DOMString}} lang)</dfn> method</dt>
-  <dd>The availableOnDevice method returns a Promise that resolves to a boolean indicating whether on-device speech recognition is available for a given BCP 47 language tag. [[!BCP47]]</dd>
+  <dd>
+    The {{SpeechRecognition/availableOnDevice}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the on-device speech recognition availability for a given [[!BCP47]] language tag.
+
+    When invoked, run these steps:
+    1. Let <var>promise</var> be <a>a new promise</a>.
+    1. Run the <a>on-device availability algorithm</a> with <var>lang</var> and <var>promise</var>. If it returns an exception, throw it and abort these steps.
+    1. Return <var>promise</var>.
+  </dd>
 
   <dt><dfn method for=SpeechRecognition>installOnDevice({{DOMString}} lang)</dfn> method</dt>
-  <dd>The installOnDevice method returns a Promise that resolves to a boolean indicating whether the installation of on-device speech recognition for a given BCP 47 language tag initiated successfully. [[!BCP47]]</dd>
+  <dd>
+    The {{SpeechRecognition/installOnDevice}} method returns a {{Promise}} that resolves to a {{boolean}} when and whether the installation of on-device speech recognition for a given [[!BCP47]] language tag succeeded.
+
+    When invoked, run these steps:
+    1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
+    1. If <var>lang</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
+    1. If the on-device speech recognition language pack for <var>lang</var> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
+    1. Let <var>promise</var> be <a>a new promise</a>.
+    1. Initiate the download of the on-device speech recognition language for <var>lang</var>.
+        <p class=note>
+          Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
+        </p>
+    1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
+        - If the download succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
+            <p class="note">
+              Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
+            </p>
+    1. Return <var>promise</var>.
+  </dd>
 
 </dl>
+<p>When the  <dfn>on-device availability algorithm</dfn> with <var>lang</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
+1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
+1. If <var>lang</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
+1. Determine the availability status for <var>lang</var>:
+    - If the on-device speech recognition language pack for <var>lang</var> is unsupported, let <var>status</var> be {{AvailabilityStatus/unavailable}}.
+    - Else if the on-device speech recognition language pack for <var>lang</var> is supported but not installed, let <var>status</var> be {{AvailabilityStatus/downloadable}}.
+    - Else if the on-device speech recognition language pack for <var>lang</var> is downloading, let <var>status</var> be {{AvailabilityStatus/downloading}}.
+    - Else if the on-device speech recognition language pack for <var>lang</var> is installed, let <var>status</var> be {{AvailabilityStatus/available}}.
+1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
+    - Resolve <var>promise</var> with <var>status</var>.
 
 When the <dfn>start session algorithm</dfn> with
 |requestMicrophonePermission| is invoked, the user agent MUST run the
@@ -437,6 +538,9 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
 
     <dt><dfn enum-value for=SpeechRecognitionErrorCode>"language-not-supported"</dfn></dt>
     <dd>The language was not supported.</dd>
+
+    <dt><dfn enum-value for=SpeechRecognitionErrorCode>"phrases-not-supported"</dfn></dt>
+    <dd>The speech recognition model does not support phrases for contextual biasing.</dd>
   </dl>
   </dd>
 
@@ -513,6 +617,98 @@ For a non-continuous recognition it will hold only a single value.</p>
   All array entries (if any) for indexes equal or greater than resultIndex that were present in the array when the last SpeechRecognitionResultEvent was raised are removed and overwritten with new results.
   The length of the "results" array may increase or decrease, but must not be less than resultIndex.
   Note that when resultIndex equals results.length, no new results are returned, this may occur when the array length decreases to remove one or more interim results.</dd>
+</dl>
+
+<h4 id="speechreco-phrase">SpeechRecognitionPhrase</h4>
+
+<p>The SpeechRecognitionPhrase object represents a phrase for contextual biasing and has the following internal slots:</p>
+
+<dl dfn-type=attribute dfn-for="SpeechRecognitionPhrase">
+    : <dfn>[[phrase]]</dfn>
+    ::
+        A {{DOMString}} representing the text string to be boosted. The initial value is null.
+        An empty value is allowed but should be ignored by the speech recognition model.
+</dl>
+
+<dl dfn-type=attribute dfn-for="SpeechRecognitionPhrase">
+    : <dfn>[[boost]]</dfn>
+    ::
+        A float representing approximately the natural log of the number of times more likely the website thinks this phrase is
+        than what the speech recognition model knows.
+        A valid boost must be a float value inside the range [0.0, 10.0], with a default value of 1.0 if not specified.
+        A boost of 0.0 means the phrase is not boosted at all, and a higher boost means the phrase is more likely to appear.
+        A boost of 10.0 means the phrase is extremely likely to appear and should be rarely set.
+</dl>
+
+<dl>
+  <dt><dfn constructor for=SpeechRecognitionPhrase>SpeechRecognitionPhrase(|phrase|, |boost|)</dfn> constructor</dt>
+  <dd>
+    When this constructor is invoked, run the following steps:
+    1. If |boost| is smaller than 0.0 or greater than 10.0, throw a {{SyntaxError}} and abort these steps.
+    1. Let |phr| be a new object of type {{SpeechRecognitionPhrase}}.
+    1. Set |phr|.{{[[phrase]]}} to be the value of |phrase|.
+    1. Set |phr|.{{[[boost]]}} to be the value of |boost|.
+    1. Return |phr|.
+  </dd>
+
+  <dt><dfn attribute for=SpeechRecognitionPhrase>phrase</dfn> attribute</dt>
+  <dd>This attribute returns the value of {{[[phrase]]}}.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionPhrase>boost</dfn> attribute</dt>
+  <dd>This attribute returns the value of {{[[boost]]}}.</dd>
+</dl>
+
+<h4 id="speechreco-phraselist">SpeechRecognitionPhraseList</h4>
+
+<p>The SpeechRecognitionPhraseList object holds a list of phrases for contextual biasing and has the following internal slot:</p>
+
+<dl dfn-type=attribute dfn-for="SpeechRecognitionPhraseList">
+    : <dfn>[[phrases]]</dfn>
+    ::
+        A list of {{SpeechRecognitionPhrase}} representing the phrases to be boosted. The initial value is an empty list.
+</dl>
+
+<dl>
+  <dt><dfn constructor for=SpeechRecognitionPhraseList>SpeechRecognitionPhraseList(|phrases|)</dfn> constructor</dt>
+  <dd>
+    When this constructor is invoked, run the following steps:
+    1. Let |list| be a new object of type {{SpeechRecognitionPhraseList}}.
+    1. Set |list|.{{SpeechRecognitionPhraseList/[[phrases]]}} to be the value of |phrases|.
+    1. Return |list|.
+  </dd>
+
+  <dt><dfn attribute for=SpeechRecognitionPhraseList>length</dfn> attribute</dt>
+  <dd>
+    This attribute indicates the number of phrases in the list.
+    When invoked, return the number of items in {{SpeechRecognitionPhraseList/[[phrases]]}}.
+  </dd>
+
+  <dt><dfn method for=SpeechRecognitionPhraseList>item(|index|)</dfn> method</dt>
+  <dd>
+    This method gets the {{SpeechRecognitionPhrase}} object at the |index| of the list.
+    When invoked, run the following steps:
+    1. If |index| is smaller than 0, or greater than or equal to {{SpeechRecognitionPhraseList/length}},
+        throw a {{RangeError}} and abort these steps.
+    1. Return the {{SpeechRecognitionPhrase}} at the |index| of {{SpeechRecognitionPhraseList/[[phrases]]}}.
+  </dd>
+
+  <dt><dfn method for=SpeechRecognitionPhraseList>addItem(|item|)</dfn> method</dt>
+  <dd>
+    This method adds the {{SpeechRecognitionPhrase}} object |item| to the list.
+    When invoked, add |item| to the end of {{SpeechRecognitionPhraseList/[[phrases]]}}.
+    The list is allowed to have multiple {{SpeechRecognitionPhrase}} objects with the same {{SpeechRecognitionPhrase/[[phrase]]}} value,
+    and the speech recognition model should use the last {{SpeechRecognitionPhrase/[[boost]]}} value
+    for this {{SpeechRecognitionPhrase/[[phrase]]}} in the list.
+  </dd>
+
+  <dt><dfn method for=SpeechRecognitionPhraseList>removeItem(|index|)</dfn> method</dt>
+  <dd>
+    This method removes the {{SpeechRecognitionPhrase}} object at the |index| of the list.
+    When invoked, run the following steps:
+    1. If |index| is smaller than 0, or greater than or equal to {{SpeechRecognitionPhraseList/length}},
+        throw a {{RangeError}} and abort these steps.
+    1. Remove the {{SpeechRecognitionPhrase}} object at the |index| of {{SpeechRecognitionPhraseList/[[phrases]]}}.
+  </dd>
 </dl>
 
 <h3 id="tts-section">The SpeechSynthesis Interface</h3>
@@ -685,7 +881,7 @@ interface SpeechSynthesisVoice {
 
   <dt><dfn attribute for=SpeechSynthesisUtterance>lang</dfn> attribute</dt>
   <dd>This attribute specifies the language of the speech synthesis for the utterance, using a valid BCP 47 language tag. [[!BCP47]]
-  If unset it remains unset for getting in script, but will default to use the <a spec=html>language</a> of the html document root element and associated hierarchy.
+  If unset it remains unset for getting in script, but will default to use the language of the html document root element and associated hierarchy.
   This default value is computed and used when the input request opens a connection to the recognition service.</dd>
 
   <dt><dfn attribute for=SpeechSynthesisUtterance>voice</dfn> attribute</dt>
