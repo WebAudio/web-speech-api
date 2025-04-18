@@ -117,6 +117,8 @@ This does not preclude adding support for this as a future API enhancement, and 
   </li>
 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
+
+  <li>To mitigate the risk of fingerprinting, user agent MUST NOT personalize speech recognition when performing speech recognition on a {{MediaStreamTrack}}.</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -211,8 +213,7 @@ enum SpeechRecognitionErrorCode {
 
 enum SpeechRecognitionMode {
     "ondevice-preferred", // On-device speech recognition if available, otherwise use Cloud speech recognition as a fallback.
-    "ondevice-only", // On-device speech recognition only. Returns an error if on-device speech recognition is not available.
-    "cloud-only", // Cloud speech recognition only.
+    "ondevice-only", // On-device speech recognition only. Throw an error if on-device speech recognition is not available.
 };
 
 enum AvailabilityStatus {
@@ -409,7 +410,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. Let <var>promise</var> be <a>a new promise</a>.
     1. Initiate the download of the on-device speech recognition language for <var>lang</var>.
         <p class=note>
-          Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
+          Note: The user agent MAY prompt the user for explicit permission to download the on-device speech recognition language pack.
         </p>
     1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
         - If the download succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
