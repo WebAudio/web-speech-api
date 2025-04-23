@@ -8,7 +8,7 @@
   <meta content="Bikeshed version b25686b9f, updated Fri Mar 14 14:15:20 2025 -0700" name="generator">
   <link href="https://webaudio.github.io/web-speech-api/" rel="canonical">
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
-  <meta content="bc21038e415f32a2eb830e78a729b8e5e5be27fa" name="revision">
+  <meta content="227a27064a12bfd4258303b33e1acd1bbc3d1578" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -696,7 +696,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Web Speech API</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2025-04-14">14 April 2025</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2025-04-23">23 April 2025</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -1679,8 +1679,8 @@ These events do not bubble and are not cancelable.</p>
    <h2 class="heading settled" data-level="5" id="examples"><span class="secno">5. </span><span class="content">Examples</span><a class="self-link" href="#examples"></a></h2>
    <p><em>This section is non-normative.</em></p>
    <h3 class="heading settled" data-level="5.1" id="examples-recognition"><span class="secno">5.1. </span><span class="content">Speech Recognition Examples</span><a class="self-link" href="#examples-recognition"></a></h3>
-   <div class="example" id="example-6028c029">
-    <a class="self-link" href="#example-6028c029"></a> 
+   <div class="example" id="input-field">
+    <a class="self-link" href="#input-field"></a> 
     <p>Using speech recognition to fill an input-field and perform a web search.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   <c- a>var</c-> recognition <c- o>=</c-> <c- ow>new</c-> SpeechRecognition<c- p>();</c->
@@ -1698,8 +1698,8 @@ These events do not bubble and are not cancelable.</p>
 <c- p>&lt;/</c-><c- f>form</c-><c- p>></c->
 </pre>
    </div>
-   <div class="example" id="example-e180055f">
-    <a class="self-link" href="#example-e180055f"></a> 
+   <div class="example" id="fill-option-list">
+    <a class="self-link" href="#fill-option-list"></a> 
     <p>Using speech recognition to fill an options list with alternative speech results.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   <c- a>var</c-> recognition <c- o>=</c-> <c- ow>new</c-> SpeechRecognition<c- p>();</c->
@@ -1724,8 +1724,8 @@ These events do not bubble and are not cancelable.</p>
 <c- p>&lt;</c-><c- f>button</c-> <c- e>onclick</c-><c- o>=</c-><c- s>"start()"</c-><c- p>></c->Click to Speak<c- p>&lt;/</c-><c- f>button</c-><c- p>></c->
 </pre>
    </div>
-   <div class="example" id="example-cd7b2fc0">
-    <a class="self-link" href="#example-cd7b2fc0"></a> 
+   <div class="example" id="fill-textarea">
+    <a class="self-link" href="#fill-textarea"></a> 
     <p>Using continuous speech recognition to fill a textarea.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>textarea</c-> <c- e>id</c-><c- o>=</c-><c- s>"textarea"</c-> <c- e>rows</c-><c- o>=</c-><c- s>10</c-> <c- e>cols</c-><c- o>=</c-><c- s>80</c-><c- p>>&lt;/</c-><c- f>textarea</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>button</c-> <c- e>id</c-><c- o>=</c-><c- s>"button"</c-> <c- e>onclick</c-><c- o>=</c-><c- s>"toggleStartStop()"</c-><c- p>>&lt;/</c-><c- f>button</c-><c- p>></c->
@@ -1763,8 +1763,8 @@ These events do not bubble and are not cancelable.</p>
 <c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
    </div>
-   <div class="example" id="example-bd8b6e17">
-    <a class="self-link" href="#example-bd8b6e17"></a> 
+   <div class="example" id="continuous-recognition">
+    <a class="self-link" href="#continuous-recognition"></a> 
     <p>Using continuous speech recognition, showing final results in black and interim results in grey.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>button</c-> <c- e>id</c-><c- o>=</c-><c- s>"button"</c-> <c- e>onclick</c-><c- o>=</c-><c- s>"toggleStartStop()"</c-><c- p>>&lt;/</c-><c- f>button</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>div</c-> <c- e>style</c-><c- o>=</c-><c- s>"border:dotted;padding:10px"</c-><c- p>></c->
@@ -1815,16 +1815,16 @@ These events do not bubble and are not cancelable.</p>
 </pre>
    </div>
    <h3 class="heading settled" data-level="5.2" id="examples-synthesis"><span class="secno">5.2. </span><span class="content">Speech Synthesis Examples</span><a class="self-link" href="#examples-synthesis"></a></h3>
-   <div class="example" id="example-5b46b7f4">
-    <a class="self-link" href="#example-5b46b7f4"></a> 
+   <div class="example" id="speak-text">
+    <a class="self-link" href="#speak-text"></a> 
     <p>Spoken text.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   speechSynthesis<c- p>.</c->speak<c- p>(</c-><c- ow>new</c-> SpeechSynthesisUtterance<c- p>(</c-><c- t>'Hello World'</c-><c- p>));</c->
 <c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
    </div>
-   <div class="example" id="example-75aea718">
-    <a class="self-link" href="#example-75aea718"></a> 
+   <div class="example" id="speak-text-advanced">
+    <a class="self-link" href="#speak-text-advanced"></a> 
     <p>Spoken text with attributes and events.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   <c- a>var</c-> u <c- o>=</c-> <c- ow>new</c-> SpeechSynthesisUtterance<c- p>();</c->
