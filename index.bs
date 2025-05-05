@@ -165,7 +165,7 @@ The term "interim result" indicates a SpeechRecognitionResult in which the final
 </dl>
 
 <xmp class="idl">
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognition : EventTarget {
     constructor();
 
@@ -223,7 +223,7 @@ enum AvailabilityStatus {
     "available"
 };
 
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionErrorEvent : Event {
     constructor(DOMString type, SpeechRecognitionErrorEventInit eventInitDict);
     readonly attribute SpeechRecognitionErrorCode error;
@@ -236,14 +236,14 @@ dictionary SpeechRecognitionErrorEventInit : EventInit {
 };
 
 // Item in N-best list
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionAlternative {
     readonly attribute DOMString transcript;
     readonly attribute float confidence;
 };
 
 // A complete one-shot simple response
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
     getter SpeechRecognitionAlternative item(unsigned long index);
@@ -251,14 +251,14 @@ interface SpeechRecognitionResult {
 };
 
 // A collection of responses (used in continuous mode)
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionResultList {
     readonly attribute unsigned long length;
     getter SpeechRecognitionResult item(unsigned long index);
 };
 
 // A full response, which could be interim or final, part of a continuous response or not
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionEvent : Event {
     constructor(DOMString type, SpeechRecognitionEventInit eventInitDict);
     readonly attribute unsigned long resultIndex;
@@ -271,7 +271,7 @@ dictionary SpeechRecognitionEventInit : EventInit {
 };
 
 // The object representing a phrase for contextual biasing.
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionPhrase {
     constructor(DOMString phrase, optional float boost = 1.0);
     readonly attribute DOMString phrase;
@@ -279,7 +279,7 @@ interface SpeechRecognitionPhrase {
 };
 
 // The object representing a list of phrases for contextual biasing.
-[Exposed=Window]
+[SecureContext, Exposed=Window]
 interface SpeechRecognitionPhraseList {
     constructor(sequence<SpeechRecognitionPhrase> phrases);
     readonly attribute unsigned long length;
