@@ -118,6 +118,8 @@ This does not preclude adding support for this as a future API enhancement, and 
   </li>
 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
+
+  <li>To mitigate the risk of fingerprinting, user agent MUST NOT personalize speech recognition when performing speech recognition on a {{MediaStreamTrack}}.</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -153,9 +155,9 @@ The term "interim result" indicates a SpeechRecognitionResult in which the final
 </dl>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
-    : <dfn>[[mode]]</dfn>
+    : <dfn>[[options]]</dfn>
     ::
-        A {{SpeechRecognitionMode}} enum to determine where speech recognition takes place. The initial value is <code>ondevice-preferred</code>.
+        A {{SpeechRecognitionOptions}} representing the options for speech recognition, or null. The initial value is `null`.
 </dl>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
@@ -174,7 +176,7 @@ interface SpeechRecognition : EventTarget {
     attribute boolean continuous;
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
-    attribute SpeechRecognitionMode mode;
+    attribute SpeechRecognitionOptions? options;
     attribute SpeechRecognitionPhraseList phrases;
 
     // methods to drive the speech interaction
@@ -182,8 +184,8 @@ interface SpeechRecognition : EventTarget {
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
-    static Promise<AvailabilityStatus> availableOnDevice(SpeechRecognitionAvailabilityOptions options);
-    static Promise<boolean> installOnDevice(SpeechRecognitionInstallationOptions options);
+    static Promise<AvailabilityStatus> available(SpeechRecognitionOptions options);
+    static Promise<boolean> install(SpeechRecognitionOptions options);
 
     // event methods
     attribute EventHandler onaudiostart;
@@ -199,12 +201,9 @@ interface SpeechRecognition : EventTarget {
     attribute EventHandler onend;
 };
 
-dictionary SpeechRecognitionAvailabilityOptions {
-  required DOMString lang;
-};
-
-dictionary SpeechRecognitionInstallationOptions {
-  required DOMString lang;
+dictionary SpeechRecognitionOptions {
+  DOMString[] langs;
+  boolean processLocally = false;
 };
 
 enum SpeechRecognitionErrorCode {
@@ -216,12 +215,6 @@ enum SpeechRecognitionErrorCode {
     "service-not-allowed",
     "language-not-supported",
     "phrases-not-supported"
-};
-
-enum SpeechRecognitionMode {
-    "ondevice-preferred", // On-device speech recognition if available, otherwise use Cloud speech recognition as a fallback.
-    "ondevice-only", // On-device speech recognition only. Returns an error if on-device speech recognition is not available.
-    "cloud-only", // Cloud speech recognition only.
 };
 
 enum AvailabilityStatus {
@@ -322,20 +315,27 @@ interface SpeechRecognitionPhraseList {
   <dd>This attribute will set the maximum number of {{SpeechRecognitionAlternative}}s per result.
   The default value is 1.</dd>
 
-  <dt><dfn attribute for=SpeechRecognition>mode</dfn> attribute</dt>
+  <dt><dfn attribute for=SpeechRecognition>options</dfn> attribute</dt>
   <dd>
-   This attribute represents where speech recognition takes place.
-  </dd>
-  <dd>
-    The getter steps are to return the value of {{SpeechRecognition/[[mode]]}}.
-  </dd>
-  <dd>
-    The setter steps are:
-    1. If the {{SpeechRecognitionPhraseList/length}} of {{SpeechRecognition/phrases}} is greater than 0
-        and the system using the given value for {{SpeechRecognition/[[mode]]}} does not support contextual biasing,
-        throw a {{SpeechRecognitionErrorEvent}} with the {{SpeechRecognitionErrorCode/phrases-not-supported}}
-        error code and abort these steps.
-    1. Set {{SpeechRecognition/[[mode]]}} to the given value.
+   This attribute allows specification of a {{SpeechRecognitionOptions}} object to configure options for speech recognition.
+   If this attribute is null, default behaviors apply for these options.
+   The {{SpeechRecognitionOptions}} dictionary has the following members:
+   <dl>
+     <dt><dfn dict-member for="SpeechRecognitionOptions">langs</dfn></dt>
+     <dd>A sequence of {{DOMString}}s. Each {{DOMString}} in the sequence <em class="rfc2119" title="MUST">MUST</em> be a
+     valid [[!BCP47]] language tag. When used with {{SpeechRecognition/start()}}, the user agent will attempt to use the languages in the order provided, selecting the first one that is 
+     available. When used with {{SpeechRecognition/start()}} and {{SpeechRecognition/lang}} is also specified, {{SpeechRecognitionOptions/langs}} <em class="rfc2119" title="MUST">MUST</em> be empty or contain a single language tag identical to {{SpeechRecognition/lang}}.</dd>
+     <dt><dfn dict-member for="SpeechRecognitionOptions">processLocally</dfn></dt>
+     <dd>A boolean that defaults to <code>false</code>.
+     If set to <code>true</code>, it indicates a requirement that the speech recognition process <em class="rfc2119" title="MUST">MUST</em> be performed locally on the user's device, without sending audio data to a remote server.
+     If set to <code>false</code>, the user agent is free to choose between local and remote processing.
+     <p>When the {{SpeechRecognition/options}} attribute of a {{SpeechRecognition}} instance is set to a {{SpeechRecognitionOptions}} object where <code>processLocally</code> is <code>true</code>,
+     and {{SpeechRecognition/start()}} is subsequently called: if local processing is not available for the language selected or if the user agent cannot fulfill the local processing requirement for other reasons,
+     the {{SpeechRecognition/start()}} method <em class="rfc2119" title="MUST">MUST</em> fail by dispatching an <a event for=SpeechRecognition>error</a> event with the {{SpeechRecognitionErrorCode/service-not-allowed}} code.</p>
+     <p>When used with {{SpeechRecognition/available()}}, it will check the availability of speech recognition matching the options.
+     When used with {{SpeechRecognition/install()}} it will install speech recognition matching the options.</p>
+     </dd>
+   </dl>
   </dd>
 
   <dt><dfn attribute for=SpeechRecognition>phrases</dfn> attribute</dt>
@@ -397,33 +397,36 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   The user agent must raise an <a event for=SpeechRecognition>end</a> event once the speech service is no longer connected.
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
 
-  <dt><dfn method for=SpeechRecognition>availableOnDevice({{SpeechRecognitionAvailabilityOptions}} options)</dfn> method</dt>
+  <dt><dfn method for=SpeechRecognition>available({{SpeechRecognitionOptions}} options)</dfn> method</dt>
   <dd>
-    The {{SpeechRecognition/availableOnDevice}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the on-device speech recognition availability for a given [[!BCP47]] language tag and optional configuration options.
+    The {{SpeechRecognition/available}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the recognition availability matching the {{SpeechRecognitionOptions}} argument.
 
     When invoked, run these steps:
-    1. Let <var>lang</var> be <code>options.lang</code>.
+    1. Let <var>langs</var> be <code>options.langs</code>.
     1. Let <var>promise</var> be <a>a new promise</a>.
-    1. Run the <a>on-device availability algorithm</a> with <var>lang</var> and <var>promise</var>. If it returns an exception, throw it and abort these steps.
+    1. Run the <a>on-device availability algorithm</a> with <var>langs</var> and <var>promise</var>. If it returns an exception, throw it and abort these steps.
     1. Return <var>promise</var>.
   </dd>
 
-  <dt><dfn method for=SpeechRecognition>installOnDevice({{SpeechRecognitionInstallationOptions}} options)</dfn> method</dt>
+  <dt><dfn method for=SpeechRecognition>install({{SpeechRecognitionOptions}} options)</dfn> method</dt>
   <dd>
-    The {{SpeechRecognition/installOnDevice}} method returns a {{Promise}} that resolves to a {{boolean}} when and whether the installation of on-device speech recognition for a given [[!BCP47]] language tag succeeded.
+    The {{SpeechRecognition/install}} method attempts to install on-device speech recognition language packs for all languages specified in `options.langs`.
+    It returns a {{Promise}} that resolves to a {{boolean}}.
+    The promise resolves to `true` if all installation attempts for requested and supported languages succeed (or the languages were already installed).
+    The promise resolves to `false` if `options.langs` is empty, if not all of the requested languages are supported, or if any installation attempt for a supported language fails.
 
     When invoked, run these steps:
     1. Let <var>lang</var> be <code>options.lang</code>.
     1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
-    1. If <var>lang</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
-    1. If the on-device speech recognition language pack for <var>lang</var> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
+    1. If any <var>lang</var> in <code>options.langs</code> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
+    1. If the on-device speech recognition language pack for any <var>lang</var> in <code>options.langs</code> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
     1. Let <var>promise</var> be <a>a new promise</a>.
-    1. Initiate the download of the on-device speech recognition language for <var>lang</var>.
+    1. For each <var>lang</var> in <code>options.langs</code>, initiate the download of the on-device speech recognition language for <var>lang</var>.
         <p class=note>
           Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
         </p>
     1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
-        - If the download succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
+        - If the download of all languages specified by <code>options.langs</code> succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
             <p class="note">
               Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
             </p>
@@ -431,14 +434,14 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   </dd>
 
 </dl>
-<p>When the  <dfn>on-device availability algorithm</dfn> with <var>lang</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
+<p>When the  <dfn>on-device availability algorithm</dfn> with <var>langs</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
 1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
-1. If <var>lang</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
-1. Determine the availability status for <var>lang</var>:
-    - If the on-device speech recognition language pack for <var>lang</var> is unsupported, let <var>status</var> be {{AvailabilityStatus/unavailable}}.
-    - Else if the on-device speech recognition language pack for <var>lang</var> is supported but not installed, let <var>status</var> be {{AvailabilityStatus/downloadable}}.
-    - Else if the on-device speech recognition language pack for <var>lang</var> is downloading, let <var>status</var> be {{AvailabilityStatus/downloading}}.
-    - Else if the on-device speech recognition language pack for <var>lang</var> is installed, let <var>status</var> be {{AvailabilityStatus/available}}.
+1. If any <var>lang</var> in <code>langs</code> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
+1. Determine the availability status for <var>langs</var>:
+    - If on-device speech recognition for each <var>lang</var> in <code>langs</code> is installed, let <var>status</var> be {{AvailabilityStatus/available}}.
+    - Else if on-device speech recognition for each <var>lang</var> in <code>langs</code> is installed or downloading, let <var>status</var> be {{AvailabilityStatus/downloading}}.
+    - Else if on-device speech recognition for each <var>lang</var> in <code>langs</code> is installed, downloading, or supported but not installed let <var>status</var> be {{AvailabilityStatus/downloadable}}.
+    - Else let <var>status</var> be {{AvailabilityStatus/unavailable}}.
 1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
     - Resolve <var>promise</var> with <var>status</var>.
 
