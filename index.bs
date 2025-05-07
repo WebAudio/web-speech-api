@@ -182,8 +182,8 @@ interface SpeechRecognition : EventTarget {
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
-    static Promise<AvailabilityStatus> availableOnDevice(DOMString lang);
-    static Promise<boolean> installOnDevice(DOMString lang);
+    static Promise<AvailabilityStatus> availableOnDevice(SpeechRecognitionAvailabilityOptions options);
+    static Promise<boolean> installOnDevice(SpeechRecognitionInstallationOptions options);
 
     // event methods
     attribute EventHandler onaudiostart;
@@ -197,6 +197,14 @@ interface SpeechRecognition : EventTarget {
     attribute EventHandler onerror;
     attribute EventHandler onstart;
     attribute EventHandler onend;
+};
+
+dictionary SpeechRecognitionAvailabilityOptions {
+  required DOMString lang;
+};
+
+dictionary SpeechRecognitionInstallationOptions {
+  required DOMString lang;
 };
 
 enum SpeechRecognitionErrorCode {
@@ -389,21 +397,23 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   The user agent must raise an <a event for=SpeechRecognition>end</a> event once the speech service is no longer connected.
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a event for=SpeechRecognition>end</a> or <a event for=SpeechRecognition>error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.</dd>
 
-  <dt><dfn method for=SpeechRecognition>availableOnDevice({{DOMString}} lang)</dfn> method</dt>
+  <dt><dfn method for=SpeechRecognition>availableOnDevice({{SpeechRecognitionAvailabilityOptions}} options)</dfn> method</dt>
   <dd>
-    The {{SpeechRecognition/availableOnDevice}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the on-device speech recognition availability for a given [[!BCP47]] language tag.
+    The {{SpeechRecognition/availableOnDevice}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the on-device speech recognition availability for a given [[!BCP47]] language tag and optional configuration options.
 
     When invoked, run these steps:
+    1. Let <var>lang</var> be <code>options.lang</code>.
     1. Let <var>promise</var> be <a>a new promise</a>.
     1. Run the <a>on-device availability algorithm</a> with <var>lang</var> and <var>promise</var>. If it returns an exception, throw it and abort these steps.
     1. Return <var>promise</var>.
   </dd>
 
-  <dt><dfn method for=SpeechRecognition>installOnDevice({{DOMString}} lang)</dfn> method</dt>
+  <dt><dfn method for=SpeechRecognition>installOnDevice({{SpeechRecognitionInstallationOptions}} options)</dfn> method</dt>
   <dd>
     The {{SpeechRecognition/installOnDevice}} method returns a {{Promise}} that resolves to a {{boolean}} when and whether the installation of on-device speech recognition for a given [[!BCP47]] language tag succeeded.
 
     When invoked, run these steps:
+    1. Let <var>lang</var> be <code>options.lang</code>.
     1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
     1. If <var>lang</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
     1. If the on-device speech recognition language pack for <var>lang</var> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
