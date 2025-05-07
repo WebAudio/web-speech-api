@@ -202,7 +202,7 @@ interface SpeechRecognition : EventTarget {
 };
 
 dictionary SpeechRecognitionOptions {
-  DOMString[] langs;
+  required DOMString[] langs;
   boolean processLocally = false;
 };
 
