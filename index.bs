@@ -329,7 +329,7 @@ interface SpeechRecognitionPhraseList {
      <dd>A boolean that defaults to <code>false</code>.
      If set to <code>true</code>, it indicates a requirement that the speech recognition process <em class="rfc2119" title="MUST">MUST</em> be performed locally on the user's device, without sending audio data to a remote server.
      If set to <code>false</code>, the user agent is free to choose between local and remote processing.
-     <p>When the {{SpeechRecognition/options}} attribute of a {{SpeechRecognition}} instance is set to a {{SpeechRecognitionOptions}} object where <code>processLocally</code> is <code>true</code>,
+     <p>When the {{SpeechRecognition/options}} attribute of a {{SpeechRecognition}} instance is set to a {{SpeechRecognitionOptions}} object where {{SpeechRecognitionOptions/processLocally}} is <code>true</code>,
      and {{SpeechRecognition/start()}} is subsequently called: if local processing is not available for the language selected or if the user agent cannot fulfill the local processing requirement for other reasons,
      the {{SpeechRecognition/start()}} method <em class="rfc2119" title="MUST">MUST</em> fail by dispatching an <a event for=SpeechRecognition>error</a> event with the {{SpeechRecognitionErrorCode/service-not-allowed}} code.</p>
      <p>When used with {{SpeechRecognition/available()}}, it will check the availability of speech recognition matching the options.
