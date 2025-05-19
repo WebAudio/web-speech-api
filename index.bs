@@ -155,9 +155,9 @@ The term "interim result" indicates a {{SpeechRecognitionResult}} in which the {
 </dl>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
-    : <dfn>[[options]]</dfn>
+    : <dfn>[[processLocally]]</dfn>
     ::
-        A {{SpeechRecognitionOptions}} representing the options for speech recognition, or null. The initial value is `null`.
+        A boolean flag indicating whether recognition must be performed locally. The initial value is <code>false</code>.
 </dl>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
@@ -176,7 +176,7 @@ interface SpeechRecognition : EventTarget {
     attribute boolean continuous;
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
-    attribute SpeechRecognitionOptions? options;
+    attribute boolean processLocally;
     attribute SpeechRecognitionPhraseList phrases;
 
     // methods to drive the speech interaction
@@ -315,21 +315,10 @@ interface SpeechRecognitionPhraseList {
   <dd>This attribute will set the maximum number of {{SpeechRecognitionAlternative}}s per result.
   The default value is 1.</dd>
 
-  <dt><dfn attribute for=SpeechRecognition>options</dfn> attribute</dt>
-  <dd>
-   This attribute allows specification of a {{SpeechRecognitionOptions}} object to configure options for speech recognition.
-   If this attribute is null, default behaviors apply for these options.
-   Setting this attribute sets internal slots for the {{SpeechRecognitionOptions}} dictionary which has the following members:
-   <dl>
-     <dt><dfn dict-member for="SpeechRecognitionOptions">langs</dfn></dt>
-     <dd>A sequence of {{DOMString}}s. Each {{DOMString}} in the sequence <em class="rfc2119" title="MUST">MUST</em> be a
-     valid [[!BCP47]] language tag. When used with {{SpeechRecognition/start()}}, the user agent will attempt to use the languages in the order provided, selecting the first one that is 
-     available. 
-     <dt><dfn dict-member for="SpeechRecognitionOptions">processLocally</dfn></dt>
-     <dd>A boolean that defaults to <code>false</code>.
-     If set to <code>true</code>, it indicates a requirement that the speech recognition process <em class="rfc2119" title="MUST">MUST</em> be performed locally on the user's device.
-     If set to <code>false</code>, the user agent can choose between local and remote processing.</dd>
-   </dl>
+  <dt><dfn attribute for=SpeechRecognition>processLocally</dfn> attribute</dt>
+  <dd>This attribute, when set to true, indicates a requirement that the speech recognition process <em class="rfc2119" title="MUST">MUST</em> be performed locally on the user's device.
+  If set to false, the user agent can choose between local and remote processing.
+  The default value is false.
   </dd>
 
   <dt><dfn attribute for=SpeechRecognition>phrases</dfn> attribute</dt>
@@ -491,12 +480,8 @@ following steps:
 1. If {{SpeechRecognition/[[started]]}} is `true` and no <a event
     for=SpeechRecognition>error</a> event or <a event for=SpeechRecognition>end</a> event
     has fired on it, throw an {{InvalidStateError}} and abort these steps.
-1. Let |currentOptions| be this.{{SpeechRecognition/[[options]]}}.
-1. If |currentOptions| is not `null` and this.{{SpeechRecognition/lang}} is not `null`:
-    a. If |currentOptions|.{{SpeechRecognitionOptions/langs}} has more than one language or if it has exactly one language that does not equal this.{{SpeechRecognition/lang}}, throw a {{SyntaxError}} and abort these steps.
-1. If |currentOptions| is not `null` and |currentOptions|.{{SpeechRecognitionOptions/processLocally}} is `true`:
-    a. Let |languageForRecognition| be the language determined by the user agent for the recognition request (e.g., considering {{SpeechRecognition/lang}}, |currentOptions|.{{SpeechRecognitionOptions/langs}}, and the document's language hierarchy).
-    b. If the user agent determines that local speech recognition is not available for |languageForRecognition|, or if it cannot fulfill the local processing requirement for other reasons:
+1. If this.{{SpeechRecognition/[[processLocally]]}} is `true`:
+    a. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}}, or if it cannot fulfill the local processing requirement for other reasons:
         i. [=Queue a task=] to [=fire an event=] named `error` at `this`. The event's `error` attribute <em class="rfc2119" title="MUST">MUST</em> be {{SpeechRecognitionErrorCode/service-not-allowed}}. The event's `message` attribute <em class="rfc2119" title="MUST">MUST</em> provide an implementation-defined string detailing the reason.
         ii. Abort these steps.
 1. Set {{[[started]]}} to `true`.
