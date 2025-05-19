@@ -412,7 +412,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   <dd>
     The {{SpeechRecognition/install}} method attempts to install on-device speech recognition language packs for all languages specified in `options.langs`.
     It returns a {{Promise}} that resolves to a {{boolean}}.
-    The promise resolves to `true` if all installation attempts for requested and supported languages succeed (or the languages were already installed).
+    The promise resolves to `true` when all installation attempts for requested and supported languages succeed (or the languages were already installed).
     The promise resolves to `false` if `options.langs` is empty, if not all of the requested languages are supported, or if any installation attempt for a supported language fails.
 
     When invoked, run these steps:
