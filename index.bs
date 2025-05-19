@@ -426,7 +426,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
           Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
         </p>
     1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
-        - If the download of all languages specified by <code>options.langs</code> succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
+        - When the download of all languages specified by <code>options.langs</code> succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
             <p class="note">
               Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
             </p>
