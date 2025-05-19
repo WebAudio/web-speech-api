@@ -438,7 +438,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
 1. If any <var>lang</var> in <code>langs</code> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
 1. Determine the availability status for <var>langs</var>:
-    - If on-device speech recognition for each <var>lang</var> in <code>langs</code> is installed, let <var>status</var> be {{AvailabilityStatus/available}}.
+    - If on-device speech recognition for all <var>lang</var> in <code>langs</code> is installed, let <var>status</var> be {{AvailabilityStatus/available}}.
     - Else if on-device speech recognition for each <var>lang</var> in <code>langs</code> is installed or downloading, let <var>status</var> be {{AvailabilityStatus/downloading}}.
     - Else if on-device speech recognition for each <var>lang</var> in <code>langs</code> is installed, downloading, or supported but not installed let <var>status</var> be {{AvailabilityStatus/downloadable}}.
     - Else let <var>status</var> be {{AvailabilityStatus/unavailable}}.
