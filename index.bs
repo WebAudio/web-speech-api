@@ -424,7 +424,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 <dl>
   <dt><dfn enum-value for="AvailabilityStatus">"unavailable"</dfn></dt>
   <dd>Indicates that speech recognition is not available for the specified language(s) and processing preference.
-  If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true, this means on-device recognition for the language is not supported by the user agent.
+  If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `true`, this means on-device recognition for the language is not supported by the user agent.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is false, it means neither local nor remote recognition is available for at least one of the specified languages.</dd>
 
   <dt><dfn enum-value for="AvailabilityStatus">"downloadable"</dfn></dt>
