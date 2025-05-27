@@ -157,7 +157,7 @@ The term "interim result" indicates a {{SpeechRecognitionResult}} in which the {
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
     : <dfn>[[processLocally]]</dfn>
     ::
-        A boolean flag indicating whether recognition must be performed locally. The initial value is <code>false</code>.
+        A boolean flag indicating whether recognition <em class="rfc2119" title="MUST">MUST</em> be performed locally. The initial value is <code>false</code>.
 </dl>
 
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
@@ -449,21 +449,21 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. Else, let <var>status</var> be {{AvailabilityStatus/unavailable}}.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `true`:
       <ol type=a>
-        <li>If `langs` is an empty sequence, let `status` be {{AvailabilityStatus/unavailable}}.</li>
+        <li>If <var>langs</var> is an empty sequence, let <var>status</var> be {{AvailabilityStatus/unavailable}}.</li>
         <li>Else:
           <ol type=i>
-            <li>Let `finalStatus` be {{AvailabilityStatus/available}}.</li>
-            <li>For each `language` in `langs`:
+            <li>Let <var>finalStatus</var> be {{AvailabilityStatus/available}}.</li>
+            <li>For each <var>language</var> in <var>langs</var>:
               <ol>
-                <li>Let `currentLanguageStatus`.</li>
-                <li>If on-device speech recognition for `language` is installed, set `currentLanguageStatus` to {{AvailabilityStatus/available}}.</li>
-                <li>Else if on-device speech recognition for `language` is currently being downloaded, set `currentLanguageStatus` to {{AvailabilityStatus/downloading}}.</li>
-                <li>Else if on-device speech recognition for `language` is supported by the user agent but not yet installed, set `currentLanguageStatus` to {{AvailabilityStatus/downloadable}}.</li>
-                <li>Else (on-device speech recognition for `language` is not supported), set `currentLanguageStatus` to {{AvailabilityStatus/unavailable}}.</li>
-                <li>If `currentLanguageStatus` comes after `finalStatus` in the ordered list `[{{AvailabilityStatus/available}}, {{AvailabilityStatus/downloading}}, {{AvailabilityStatus/downloadable}}, {{AvailabilityStatus/unavailable}}]`, set `finalStatus` to `currentLanguageStatus`.</li>
+                <li>Let <var>currentLanguageStatus</var>.</li>
+                <li>If on-device speech recognition for <var>language</var> is installed, set <var>currentLanguageStatus</var> to {{AvailabilityStatus/available}}.</li>
+                <li>Else if on-device speech recognition for <var>language</var> is currently being downloaded, set <var>currentLanguageStatus</var> to {{AvailabilityStatus/downloading}}.</li>
+                <li>Else if on-device speech recognition for <var>language</var> is supported by the user agent but not yet installed, set <var>currentLanguageStatus</var> to {{AvailabilityStatus/downloadable}}.</li>
+                <li>Else (on-device speech recognition for <var>language</var> is not supported), set <var>currentLanguageStatus</var> to {{AvailabilityStatus/unavailable}}.</li>
+                <li>If <var>currentLanguageStatus</var> comes after <var>finalStatus</var> in the ordered list `[{{AvailabilityStatus/available}}, {{AvailabilityStatus/downloading}}, {{AvailabilityStatus/downloadable}}, {{AvailabilityStatus/unavailable}}]`, set <var>finalStatus</var> to <var>currentLanguageStatus</var>.</li>
               </ol>
             </li>
-            <li>Let `status` be `finalStatus`.</li>
+            <li>Let <var>status</var> be <var>finalStatus</var>.</li>
           </ol>
         </li>
       </ol>
