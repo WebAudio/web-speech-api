@@ -428,7 +428,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `false`, it means neither local nor remote recognition is available for at least one of the specified languages.</dd>
 
   <dt><dfn enum-value for="AvailabilityStatus">"downloadable"</dfn></dt>
-  <dd>Indicates that on-device speech recognition for the specified language(s) is supported by the user agent but not yet installed. It can potentially be installed using the <code>install()</code> method. This status is primarily relevant when {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true.</dd>
+  <dd>Indicates that on-device speech recognition for the specified language(s) is supported by the user agent but not yet installed. It can potentially be installed using the {{SpeechRecognition/install()}} method. This status is primarily relevant when {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true.</dd>
 
   <dt><dfn enum-value for="AvailabilityStatus">"downloading"</dfn></dt>
   <dd>Indicates that on-device speech recognition for the specified language(s) is currently in the process of being downloaded. This status is primarily relevant when {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true.</dd>
