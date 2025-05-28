@@ -481,9 +481,9 @@ following steps:
     for=SpeechRecognition>error</a> event or <a event for=SpeechRecognition>end</a> event
     has fired on it, throw an {{InvalidStateError}} and abort these steps.
 1. If this.{{SpeechRecognition/[[processLocally]]}} is `true`:
-    a. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}}, or if it cannot fulfill the local processing requirement for other reasons:
-        i. [=Queue a task=] to [=fire an event=] named `error` at `this`. The event's `error` attribute <em class="rfc2119" title="MUST">MUST</em> be {{SpeechRecognitionErrorCode/service-not-allowed}}. The event's `message` attribute <em class="rfc2119" title="MUST">MUST</em> provide an implementation-defined string detailing the reason.
-        ii. Abort these steps.
+    1. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}}, or if it cannot fulfill the local processing requirement for other reasons:
+        1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/service-not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
+        1. Abort these steps.
 1. Set {{[[started]]}} to `true`.
 1. If |requestMicrophonePermission| is `true` and [=request
     permission to use=] "`microphone`" is [=permission/"denied"=], abort
