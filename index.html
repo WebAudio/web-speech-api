@@ -5,10 +5,10 @@
   <title>Web Speech API</title>
   <meta content="CG-DRAFT" name="w3c-status">
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version 9a7a6709a, updated Tue May 27 16:45:34 2025 -0700" name="generator">
+  <meta content="Bikeshed version 275834c42, updated Wed Jun 11 14:18:15 2025 -0700" name="generator">
   <link href="https://webaudio.github.io/web-speech-api/" rel="canonical">
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
-  <meta content="0f9acb03e5368c4781c66d9e01b366743ef76e5e" name="revision">
+  <meta content="e0a271fcaaa723ed459d8023d150e71fb06f8c8e" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -694,9 +694,13 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 </style>
  <body class="h-entry">
   <div class="head">
-   <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
+   <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/">
+    <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72">
+</a>
+</p>
    <h1 class="p-name no-ref" id="title">Web Speech API</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>, <time class="dt-updated" datetime="2025-05-28">28 May 2025</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>,
+    <time class="dt-updated" datetime="2025-06-13">13 June 2025</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -719,7 +723,8 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     </div>
    </details>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2025 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/copyright/software-license/" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply. </p>
+   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2025 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/copyright/software-license/" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply.
+</p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
@@ -843,18 +848,21 @@ This does not preclude adding support for this as a future API enhancement, and 
    <ol>
     <li>
      User agents must only start speech input sessions with explicit, informed user consent.
-  User consent can include, for example: 
+  User consent can include, for example:
+  
      <ul>
       <li>User click on a visible speech input element which has an obvious graphical representation showing that it will start speech input.
       <li>Accepting a permission prompt shown as the result of a call to <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-start" id="ref-for-dom-speechrecognition-start">start()</a></code>.
       <li>Consent previously granted to always allow speech input for this web page.
      </ul>
     <li>
-     User agents must give the user an obvious indication when audio is being recorded. 
+     User agents must give the user an obvious indication when audio is being recorded.
+  
      <ul>
       <li>In a graphical user agent, this could be a mandatory notification displayed by the user agent as part of its chrome and not accessible by the web page.
     This could for example be a pulsating/blinking record icon as part of the browser chrome/address bar, an indication in the status bar, an audible notification, or anything else relevant and accessible to the user.
-    This UI element must also allow the user to stop recording.<br> <img alt="Example UI recording notification." height="153" src="ui-example.png" width="389">
+    This UI element must also allow the user to stop recording.<br>
+    <img alt="Example UI recording notification." height="153" src="ui-example.png" width="389">
       <li>In a speech-only user agent, the indication may for example take the form of the system speaking the label of the speech input element, followed by a short beep.
      </ul>
     <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.
@@ -874,8 +882,11 @@ This does not preclude adding support for this as a future API enhancement, and 
    <p><em>This section is normative.</em></p>
    <h3 class="heading settled" data-level="4.1" id="speechreco-section"><span class="secno">4.1. </span><span class="content">The SpeechRecognition Interface</span><a class="self-link" href="#speechreco-section"></a></h3>
    <p>The speech recognition interface is the scripted web API for controlling a given recognition.</p>
-    The term "final result" indicates a <code class="idl"><a data-link-type="idl" href="#speechrecognitionresult" id="ref-for-speechrecognitionresult">SpeechRecognitionResult</a></code> in which the <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionresult-isfinal" id="ref-for-dom-speechrecognitionresult-isfinal">isFinal</a></code> attribute is true.
-The term "interim result" indicates a <code class="idl"><a data-link-type="idl" href="#speechrecognitionresult" id="ref-for-speechrecognitionresult①">SpeechRecognitionResult</a></code> in which the <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionresult-isfinal" id="ref-for-dom-speechrecognitionresult-isfinal①">isFinal</a></code> attribute is false. 
+   
+The term "final result" indicates a <code class="idl"><a data-link-type="idl" href="#speechrecognitionresult" id="ref-for-speechrecognitionresult">SpeechRecognitionResult</a></code> in which the <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionresult-isfinal" id="ref-for-dom-speechrecognitionresult-isfinal">isFinal</a></code> attribute is true.
+The term "interim result" indicates a <code class="idl"><a data-link-type="idl" href="#speechrecognitionresult" id="ref-for-speechrecognitionresult①">SpeechRecognitionResult</a></code> in which the <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionresult-isfinal" id="ref-for-dom-speechrecognitionresult-isfinal①">isFinal</a></code> attribute is false.
+
+
    <p><code class="idl"><a data-link-type="idl" href="#speechrecognition" id="ref-for-speechrecognition">SpeechRecognition</a></code> has the following internal slots:</p>
    <dl>
     <dt data-md><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="attribute" data-export id="dom-speechrecognition-started-slot"><code>[[started]]</code></dfn>
@@ -1017,7 +1028,8 @@ The term "interim result" indicates a <code class="idl"><a data-link-type="idl" 
    <h4 class="heading settled" data-level="4.1.1" id="speechreco-attributes"><span class="secno">4.1.1. </span><span class="content">SpeechRecognition Attributes</span><a class="self-link" href="#speechreco-attributes"></a></h4>
    <dl>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="attribute" data-export id="dom-speechrecognition-lang"><code>lang</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString⑨">DOMString</a></span>
-    <dd>This attribute will set the language of the recognition for the request, using a valid BCP 47 language tag. <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> If unset it remains unset for getting in script, but will default to use the language of the html document root element and associated hierarchy.
+    <dd>This attribute will set the language of the recognition for the request, using a valid BCP 47 language tag. <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a>
+  If unset it remains unset for getting in script, but will default to use the language of the html document root element and associated hierarchy.
   This default value is computed and used when the input request opens a connection to the recognition service.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="attribute" data-export id="dom-speechrecognition-continuous"><code>continuous</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-boolean" id="ref-for-idl-boolean⑥">boolean</a></span>
     <dd>When the continuous attribute is set to false, the user agent must return no more than one final result in response to starting recognition,
@@ -1036,12 +1048,19 @@ The term "interim result" indicates a <code class="idl"><a data-link-type="idl" 
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="attribute" data-export id="dom-speechrecognition-processlocally"><code>processLocally</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-boolean" id="ref-for-idl-boolean⑧">boolean</a></span>
     <dd>This attribute, when set to true, indicates a requirement that the speech recognition process <em class="rfc2119" title="MUST">MUST</em> be performed locally on the user’s device.
   If set to false, the user agent can choose between local and remote processing.
-  The default value is false. 
+  The default value is false.
+  
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="attribute" data-export id="dom-speechrecognition-phrases"><code>phrases</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="#speechrecognitionphraselist" id="ref-for-speechrecognitionphraselist②">SpeechRecognitionPhraseList</a></span>
-    <dd> This attribute represents a list of phrases for contextual biasing. 
-    <dd> The getter steps are to return the value of <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-phrases-slot" id="ref-for-dom-speechrecognition-phrases-slot">[[phrases]]</a></code>. 
     <dd>
-      The setter steps are: 
+    This attribute represents a list of phrases for contextual biasing.
+  
+    <dd>
+    The getter steps are to return the value of <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-phrases-slot" id="ref-for-dom-speechrecognition-phrases-slot">[[phrases]]</a></code>.
+  
+    <dd>
+     
+    The setter steps are:
+
      <ol>
       <li data-md>
        <p>If the <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-length" id="ref-for-dom-speechrecognitionphraselist-length①">length</a></code> of the given value is greater than 0 and the system does not support contextual biasing,
@@ -1058,8 +1077,11 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
    <dl>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="method" data-export id="dom-speechrecognition-start"><code>start()</code></dfn> method
     <dd>
-      Start the speech recognition process, directly from a microphone on the device.
-    When invoked, run the following steps: 
+     
+    Start the speech recognition process, directly from a microphone on the device.
+    When invoked, run the following steps:
+
+
      <ol>
       <li data-md>
        <p>Let <var>requestMicrophonePermission</var> be a boolan variable set to to <code>true</code>.</p>
@@ -1068,7 +1090,11 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
      </ol>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="method" data-export data-lt="start(audioTrack)" id="dom-speechrecognition-start-audiotrack"><code>start(<code class="idl"><a data-link-type="idl" href="https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack" id="ref-for-dom-mediastreamtrack②">MediaStreamTrack</a></code> audioTrack)</code></dfn> method
     <dd>
-      Start the speech recognition process, using a <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack" id="ref-for-dom-mediastreamtrack③">MediaStreamTrack</a></code> When invoked, run the following steps: 
+     
+    Start the speech recognition process, using a <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack" id="ref-for-dom-mediastreamtrack③">MediaStreamTrack</a></code>
+    When invoked, run the following steps:
+
+
      <ol>
       <li data-md>
        <p>Let <var>audioTrack</var> be the first argument.</p>
@@ -1076,7 +1102,8 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
        <p>If <var>audioTrack</var>’s <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-kind" id="ref-for-dom-mediastreamtrack-kind">kind</a></code> attribute is NOT <code>"audio"</code>,
 throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror">InvalidStateError</a></code> and abort these steps.</p>
       <li data-md>
-       <p>If <var>audioTrack</var>’s <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-readystate" id="ref-for-dom-mediastreamtrack-readystate">readyState</a></code> attribute is NOT <code>"live"</code>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror①">InvalidStateError</a></code> and abort these steps.</p>
+       <p>If <var>audioTrack</var>’s <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-readystate" id="ref-for-dom-mediastreamtrack-readystate">readyState</a></code> attribute is NOT
+<code>"live"</code>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror①">InvalidStateError</a></code> and abort these steps.</p>
       <li data-md>
        <p>Let <var>requestMicrophonePermission</var> be <code>false</code>.</p>
       <li data-md>
@@ -1096,7 +1123,11 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
   If the abort method is called on an object which is already stopped or aborting (that is, start was never called on it, the <a class="idl-code" data-link-type="event" href="#eventdef-speechrecognition-end" id="ref-for-eventdef-speechrecognition-end②">end</a> or <a class="idl-code" data-link-type="event" href="#eventdef-speechrecognition-error" id="ref-for-eventdef-speechrecognition-error①">error</a> event has fired on it, or abort was previously called on it), the user agent must ignore the call.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="method" data-export data-lt="available(options)" id="dom-speechrecognition-available"><code>available(<code class="idl"><a data-link-type="idl" href="#dictdef-speechrecognitionoptions" id="ref-for-dictdef-speechrecognitionoptions②">SpeechRecognitionOptions</a></code> options)</code></dfn> method
     <dd>
-      The <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-available" id="ref-for-dom-speechrecognition-available①">available</a></code> method returns a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-promise" id="ref-for-idl-promise②">Promise</a></code> that resolves to a <code class="idl"><a data-link-type="idl" href="#enumdef-availabilitystatus" id="ref-for-enumdef-availabilitystatus①">AvailabilityStatus</a></code> indicating the recognition availability matching the <code class="idl"><a data-link-type="idl" href="#dictdef-speechrecognitionoptions" id="ref-for-dictdef-speechrecognitionoptions③">SpeechRecognitionOptions</a></code> argument. 
+     
+    The <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-available" id="ref-for-dom-speechrecognition-available①">available</a></code> method returns a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-promise" id="ref-for-idl-promise②">Promise</a></code> that resolves to a <code class="idl"><a data-link-type="idl" href="#enumdef-availabilitystatus" id="ref-for-enumdef-availabilitystatus①">AvailabilityStatus</a></code> indicating the recognition availability matching the <code class="idl"><a data-link-type="idl" href="#dictdef-speechrecognitionoptions" id="ref-for-dictdef-speechrecognitionoptions③">SpeechRecognitionOptions</a></code> argument.
+    Access to this method is gated behind the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature" id="ref-for-policy-controlled-feature">policy-controlled feature</a> "on-device-speech-recognition", which has a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist" id="ref-for-policy-controlled-feature-default-allowlist">default allowlist</a> of <code><a data-link-type="dfn" href="https://w3c.github.io/webappsec-permissions-policy/#default-allowlist-self" id="ref-for-default-allowlist-self">'self'</a></code>.
+
+
      <p>When invoked, run these steps:</p>
      <ol>
       <li data-md>
@@ -1108,10 +1139,14 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
      </ol>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="method" data-export data-lt="install(options)" id="dom-speechrecognition-install"><code>install(<code class="idl"><a data-link-type="idl" href="#dictdef-speechrecognitionoptions" id="ref-for-dictdef-speechrecognitionoptions④">SpeechRecognitionOptions</a></code> options)</code></dfn> method
     <dd>
-      The <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-install" id="ref-for-dom-speechrecognition-install①">install</a></code> method attempts to install speech recognition language packs for all languages specified in <code>options.langs</code>.
+     
+    The <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-install" id="ref-for-dom-speechrecognition-install①">install</a></code> method attempts to install speech recognition language packs for all languages specified in <code>options.langs</code>.
     It returns a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-promise" id="ref-for-idl-promise③">Promise</a></code> that resolves to a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-boolean" id="ref-for-idl-boolean⑨">boolean</a></code>.
     The promise resolves to <code>true</code> when all installation attempts for requested and supported languages succeed (or the languages were already installed).
-    The promise resolves to <code>false</code> if <code>options.langs</code> is empty, if not all of the requested languages are supported, or if any installation attempt for a supported language fails. 
+    The promise resolves to <code>false</code> if <code>options.langs</code> is empty, if not all of the requested languages are supported, or if any installation attempt for a supported language fails.
+    Access to this method is gated behind the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature" id="ref-for-policy-controlled-feature①">policy-controlled feature</a> "on-device-speech-recognition", which has a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist" id="ref-for-policy-controlled-feature-default-allowlist①">default allowlist</a> of <code><a data-link-type="dfn" href="https://w3c.github.io/webappsec-permissions-policy/#default-allowlist-self" id="ref-for-default-allowlist-self①">'self'</a></code>.
+
+
      <p>When invoked, run these steps:</p>
      <ol>
       <li data-md>
@@ -1124,17 +1159,23 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
        <p>Let <var>promise</var> be <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#a-new-promise" id="ref-for-a-new-promise①">a new promise</a>.</p>
       <li data-md>
        <p>For each <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs②">langs</a></code> of <var>options</var>, initiate the download of the on-device speech recognition language for <var>lang</var>.</p>
-       <p class="note" role="note"> Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack. </p>
+       <p class="note" role="note">
+  Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
+</p>
       <li data-md>
        <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">Queue a task</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global①">relevant global object</a>’s <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration-task-queue" id="ref-for-dfn-service-worker-registration-task-queue">task queue</a> to run the following step:</p>
        <ul>
         <li data-md>
          <p>When the download of all languages specified by <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs③">langs</a></code> of <var>options</var> succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.</p>
-         <p class="note" role="note"> Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script. </p>
+         <p class="note" role="note">
+  Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
+</p>
        </ul>
       <li data-md>
        <p>Return <var>promise</var>.</p>
-       <p class="note" role="note"> <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-processlocally" id="ref-for-dom-speechrecognitionoptions-processlocally">processLocally</a></code> of <var>options</var> is not used in this algorithm. </p>
+       <p class="note" role="note">
+  <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-processlocally" id="ref-for-dom-speechrecognitionoptions-processlocally">processLocally</a></code> of <var>options</var> is not used in this algorithm.
+</p>
      </ol>
    </dl>
    <h4 class="heading settled" data-level="4.1.3" id="availability-status-values"><span class="secno">4.1.3. </span><span class="content">AvailabilityStatus Enum Values</span><a class="self-link" href="#availability-status-values"></a></h4>
@@ -1153,7 +1194,8 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
   If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-processlocally" id="ref-for-dom-speechrecognitionoptions-processlocally⑤">processLocally</a></code> of <var>options</var> is true, this means on-device recognition is installed and ready.
   If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-processlocally" id="ref-for-dom-speechrecognitionoptions-processlocally⑥">processLocally</a></code> of <var>options</var> is false, it means recognition (which could be local or remote) is available.
    </dl>
-   <p>When the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="availability-algorithm">availability algorithm</dfn> with <var>options</var> and <var>promise</var> is invoked, the user agent MUST run the following steps: </p>
+   <p>When the  <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="availability-algorithm">availability algorithm</dfn> with <var>options</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
+</p>
    <ol>
     <li data-md>
      <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object①">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global②">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window①">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active①">fully active</a>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror③">InvalidStateError</a></code> and abort these steps.</p>
@@ -1176,11 +1218,13 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
      <ol type="a">
       <li>If <var>langs</var> is an empty sequence, let <var>status</var> be <code class="idl"><a data-link-type="idl" href="#dom-availabilitystatus-unavailable" id="ref-for-dom-availabilitystatus-unavailable③">unavailable</a></code>.
       <li>
-       Else: 
+       Else:
+      
        <ol type="i">
         <li>Let <var>finalStatus</var> be <code class="idl"><a data-link-type="idl" href="#dom-availabilitystatus-available" id="ref-for-dom-availabilitystatus-available②">available</a></code>.
         <li>
-         For each <var>language</var> in <var>langs</var>: 
+         For each <var>language</var> in <var>langs</var>:
+          
          <ol>
           <li>Let <var>currentLanguageStatus</var>.
           <li>If on-device speech recognition for <var>language</var> is installed, set <var>currentLanguageStatus</var> to <code class="idl"><a data-link-type="idl" href="#dom-availabilitystatus-available" id="ref-for-dom-availabilitystatus-available③">available</a></code>.
@@ -1199,11 +1243,14 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
        <p>Resolve <var>promise</var> with <var>status</var>.</p>
      </ul>
    </ol>
-   <p>When the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="start-session-algorithm">start session algorithm</dfn> with <var>requestMicrophonePermission</var> is invoked, the user agent MUST run the
+   <p>When the <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="start-session-algorithm">start session algorithm</dfn> with
+<var>requestMicrophonePermission</var> is invoked, the user agent MUST run the
 following steps:</p>
    <ol>
     <li data-md>
-     <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object②">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global④">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window②">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active②">fully active</a>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror④">InvalidStateError</a></code> and abort these steps.</p>
+     <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object②">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global④">relevant global object</a>’s
+ <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window②">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active②">fully active</a>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror④">InvalidStateError</a></code>
+ and abort these steps.</p>
     <li data-md>
      <p>If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognition-started-slot" id="ref-for-dom-speechrecognition-started-slot">[[started]]</a></code> is <code>true</code> and no <a class="idl-code" data-link-type="event" href="#eventdef-speechrecognition-error" id="ref-for-eventdef-speechrecognition-error②">error</a> event or <a class="idl-code" data-link-type="event" href="#eventdef-speechrecognition-end" id="ref-for-eventdef-speechrecognition-end③">end</a> event
 has fired on it, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror⑤">InvalidStateError</a></code> and abort these steps.</p>
@@ -1225,7 +1272,8 @@ has fired on it, throw an <code class="idl"><a data-link-type="idl" href="https:
      <p>If <var>requestMicrophonePermission</var> is <code>true</code> and <a data-link-type="dfn" href="https://w3c.github.io/permissions/#dfn-request-permission-to-use" id="ref-for-dfn-request-permission-to-use">request permission to use</a> "<code>microphone</code>" is <a data-link-type="dfn" href="https://w3c.github.io/permissions/#dfn-denied" id="ref-for-dfn-denied">"denied"</a>, abort
 these steps.</p>
     <li data-md>
-     <p>Once the system is successfully listening to the recognition, queue a task to <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">fire an event</a> named <a class="idl-code" data-link-type="event" href="#eventdef-speechrecognition-start" id="ref-for-eventdef-speechrecognition-start">start</a> at <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this①">this</a>.</p>
+     <p>Once the system is successfully listening to the recognition, queue a task to
+<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire①">fire an event</a> named <a class="idl-code" data-link-type="event" href="#eventdef-speechrecognition-start" id="ref-for-eventdef-speechrecognition-start">start</a> at <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this①">this</a>.</p>
    </ol>
    <h4 class="heading settled" data-level="4.1.4" id="speechreco-events"><span class="secno">4.1.4. </span><span class="content">SpeechRecognition Events</span><a class="self-link" href="#speechreco-events"></a></h4>
    <p>The DOM Level 2 Event Model is used for speech recognition events.
@@ -1269,7 +1317,9 @@ For example, some implementations may fire <a class="idl-code" data-link-type="e
     <dd>Fired when a speech recognition error occurs.
   The event must use the <code class="idl"><a data-link-type="idl" href="#speechrecognitionerrorevent" id="ref-for-speechrecognitionerrorevent②">SpeechRecognitionErrorEvent</a></code> interface.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="event" data-export id="eventdef-speechrecognition-start"><code>start</code></dfn> event
-    <dd>Fired when the recognition service has begun to listen to the audio with the intention of recognizing. 
+    <dd>Fired when the recognition service has begun to listen to the audio with the intention of recognizing.
+
+  
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognition" data-dfn-type="event" data-export id="eventdef-speechrecognition-end"><code>end</code></dfn> event
     <dd>Fired when the service has disconnected.
   The event must always be generated when the session ends no matter the reason for the end.
@@ -1280,7 +1330,8 @@ For example, some implementations may fire <a class="idl-code" data-link-type="e
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionErrorEvent" data-dfn-type="attribute" data-export id="dom-speechrecognitionerrorevent-error"><code>error</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="#enumdef-speechrecognitionerrorcode" id="ref-for-enumdef-speechrecognitionerrorcode②">SpeechRecognitionErrorCode</a>, readonly</span>
     <dd>
      The errorCode is an enumeration indicating what has gone wrong.
-  The values are: 
+  The values are:
+  
      <dl>
       <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionErrorCode" data-dfn-type="enum-value" data-export id="dom-speechrecognitionerrorcode-no-speech"><code>"no-speech"</code></dfn>
       <dd>No speech was detected.
@@ -1304,7 +1355,9 @@ For example, some implementations may fire <a class="idl-code" data-link-type="e
   This attribute is primarily intended for debugging and developers should not use it directly in their application user interface.
    </dl>
    <h4 class="heading settled" data-level="4.1.6" id="speechreco-alternative"><span class="secno">4.1.6. </span><span class="content">SpeechRecognitionAlternative</span><a class="self-link" href="#speechreco-alternative"></a></h4>
-   <p>The SpeechRecognitionAlternative represents a simple view of the response that gets used in a n-best list. </p>
+   <p>The SpeechRecognitionAlternative represents a simple view of the response that gets used in a n-best list.
+
+</p>
    <dl>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionAlternative" data-dfn-type="attribute" data-export id="dom-speechrecognitionalternative-transcript"><code>transcript</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString①①">DOMString</a>, readonly</span>
     <dd>The transcript string represents the raw words that the user spoke.
@@ -1312,7 +1365,8 @@ For example, some implementations may fire <a class="idl-code" data-link-type="e
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionAlternative" data-dfn-type="attribute" data-export id="dom-speechrecognitionalternative-confidence"><code>confidence</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-float" id="ref-for-idl-float③">float</a>, readonly</span>
     <dd>
      The confidence represents a numeric estimate between 0 and 1 of how confident the recognition system is that the recognition is correct.
-  A higher number means the system is more confident. 
+  A higher number means the system is more confident.
+  
      <p class="issue" id="issue-1fc473cc"><a class="self-link" href="#issue-1fc473cc"></a>The group has discussed whether confidence can be specified in a speech-recognition-engine-independent manner and whether confidence threshold and nomatch should be included, because this is not a dialog API.
   See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Jun/0143.html">Confidence property</a> thread on public-speech-api@w3.org.</p>
    </dl>
@@ -1377,7 +1431,9 @@ A boost of 10.0 means the phrase is extremely likely to appear and should be rar
    <dl>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionPhrase" data-dfn-type="constructor" data-export data-lt="SpeechRecognitionPhrase(phrase, boost)|constructor(phrase, boost)|SpeechRecognitionPhrase(phrase)|constructor(phrase)" id="dom-speechrecognitionphrase-speechrecognitionphrase"><code>SpeechRecognitionPhrase(<var>phrase</var>, <var>boost</var>)</code></dfn> constructor
     <dd>
-      When this constructor is invoked, run the following steps: 
+     
+    When this constructor is invoked, run the following steps:
+
      <ol>
       <li data-md>
        <p>If <var>boost</var> is smaller than 0.0 or greater than 10.0, throw a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror②">SyntaxError</a></code> and abort these steps.</p>
@@ -1405,7 +1461,9 @@ A boost of 10.0 means the phrase is extremely likely to appear and should be rar
    <dl>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionPhraseList" data-dfn-type="constructor" data-export data-lt="SpeechRecognitionPhraseList(phrases)|constructor(phrases)" id="dom-speechrecognitionphraselist-speechrecognitionphraselist"><code>SpeechRecognitionPhraseList(<var>phrases</var>)</code></dfn> constructor
     <dd>
-      When this constructor is invoked, run the following steps: 
+     
+    When this constructor is invoked, run the following steps:
+
      <ol>
       <li data-md>
        <p>Let <var>list</var> be a new object of type <code class="idl"><a data-link-type="idl" href="#speechrecognitionphraselist" id="ref-for-speechrecognitionphraselist③">SpeechRecognitionPhraseList</a></code>.</p>
@@ -1415,12 +1473,16 @@ A boost of 10.0 means the phrase is extremely likely to appear and should be rar
        <p>Return <var>list</var>.</p>
      </ol>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionPhraseList" data-dfn-type="attribute" data-export id="dom-speechrecognitionphraselist-length"><code>length</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-unsigned-long" id="ref-for-idl-unsigned-long①④">unsigned long</a>, readonly</span>
-    <dd> This attribute indicates the number of phrases in the list.
-    When invoked, return the number of items in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-phrases-slot" id="ref-for-dom-speechrecognitionphraselist-phrases-slot①">[[phrases]]</a></code>. 
+    <dd>
+    This attribute indicates the number of phrases in the list.
+    When invoked, return the number of items in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-phrases-slot" id="ref-for-dom-speechrecognitionphraselist-phrases-slot①">[[phrases]]</a></code>.
+  
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionPhraseList" data-dfn-type="method" data-export id="dom-speechrecognitionphraselist-item"><code>item(<var>index</var>)</code></dfn> method
     <dd>
-      This method gets the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑤">SpeechRecognitionPhrase</a></code> object at the <var>index</var> of the list.
-    When invoked, run the following steps: 
+     
+    This method gets the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑤">SpeechRecognitionPhrase</a></code> object at the <var>index</var> of the list.
+    When invoked, run the following steps:
+
      <ol>
       <li data-md>
        <p>If <var>index</var> is smaller than 0, or greater than or equal to <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-length" id="ref-for-dom-speechrecognitionphraselist-length②">length</a></code>,
@@ -1429,15 +1491,19 @@ throw a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.what
        <p>Return the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑥">SpeechRecognitionPhrase</a></code> at the <var>index</var> of <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-phrases-slot" id="ref-for-dom-speechrecognitionphraselist-phrases-slot②">[[phrases]]</a></code>.</p>
      </ol>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionPhraseList" data-dfn-type="method" data-export id="dom-speechrecognitionphraselist-additem"><code>addItem(<var>item</var>)</code></dfn> method
-    <dd> This method adds the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑦">SpeechRecognitionPhrase</a></code> object <var>item</var> to the list.
+    <dd>
+    This method adds the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑦">SpeechRecognitionPhrase</a></code> object <var>item</var> to the list.
     When invoked, add <var>item</var> to the end of <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-phrases-slot" id="ref-for-dom-speechrecognitionphraselist-phrases-slot③">[[phrases]]</a></code>.
     The list is allowed to have multiple <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑧">SpeechRecognitionPhrase</a></code> objects with the same <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphrase-phrase-slot" id="ref-for-dom-speechrecognitionphrase-phrase-slot②">[[phrase]]</a></code> value,
     and the speech recognition model should use the last <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphrase-boost-slot" id="ref-for-dom-speechrecognitionphrase-boost-slot②">[[boost]]</a></code> value
-    for this <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphrase-phrase-slot" id="ref-for-dom-speechrecognitionphrase-phrase-slot③">[[phrase]]</a></code> in the list. 
+    for this <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphrase-phrase-slot" id="ref-for-dom-speechrecognitionphrase-phrase-slot③">[[phrase]]</a></code> in the list.
+  
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechRecognitionPhraseList" data-dfn-type="method" data-export id="dom-speechrecognitionphraselist-removeitem"><code>removeItem(<var>index</var>)</code></dfn> method
     <dd>
-      This method removes the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑨">SpeechRecognitionPhrase</a></code> object at the <var>index</var> of the list.
-    When invoked, run the following steps: 
+     
+    This method removes the <code class="idl"><a data-link-type="idl" href="#speechrecognitionphrase" id="ref-for-speechrecognitionphrase⑨">SpeechRecognitionPhrase</a></code> object at the <var>index</var> of the list.
+    When invoked, run the following steps:
+
      <ol>
       <li data-md>
        <p>If <var>index</var> is smaller than 0, or greater than or equal to <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionphraselist-length" id="ref-for-dom-speechrecognitionphraselist-length③">length</a></code>,
@@ -1593,17 +1659,20 @@ throw a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.what
    <dl>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisUtterance" data-dfn-type="attribute" data-export id="dom-speechsynthesisutterance-text"><code>text</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString②④">DOMString</a></span>
     <dd>This attribute specifies the text to be synthesized and spoken for this utterance.
-  This may be either plain text or a complete, well-formed SSML document. <a data-link-type="biblio" href="#biblio-ssml" title="Speech Synthesis Markup Language (SSML) Version 1.1">[SSML]</a> For speech synthesis engines that do not support SSML, or only support certain tags, the user agent or speech engine must strip away the tags they do not support and speak the text.
+  This may be either plain text or a complete, well-formed SSML document. <a data-link-type="biblio" href="#biblio-ssml" title="Speech Synthesis Markup Language (SSML) Version 1.1">[SSML]</a>
+  For speech synthesis engines that do not support SSML, or only support certain tags, the user agent or speech engine must strip away the tags they do not support and speak the text.
   There may be a maximum length of the text, it may be limited to 32,767 characters.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisUtterance" data-dfn-type="attribute" data-export id="dom-speechsynthesisutterance-lang"><code>lang</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString②⑤">DOMString</a></span>
-    <dd>This attribute specifies the language of the speech synthesis for the utterance, using a valid BCP 47 language tag. <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> If unset it remains unset for getting in script, but will default to use the language of the html document root element and associated hierarchy.
+    <dd>This attribute specifies the language of the speech synthesis for the utterance, using a valid BCP 47 language tag. <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a>
+  If unset it remains unset for getting in script, but will default to use the language of the html document root element and associated hierarchy.
   This default value is computed and used when the input request opens a connection to the recognition service.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisUtterance" data-dfn-type="attribute" data-export id="dom-speechsynthesisutterance-voice"><code>voice</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="#speechsynthesisvoice" id="ref-for-speechsynthesisvoice②">SpeechSynthesisVoice</a>, nullable</span>
     <dd>This attribute specifies the speech synthesis voice that the web application wishes to use.
   When a <code class="idl"><a data-link-type="idl" href="#speechsynthesisutterance" id="ref-for-speechsynthesisutterance③">SpeechSynthesisUtterance</a></code> object is created this attribute must be initialized to null.
   If, at the time of the <code class="idl"><a data-link-type="idl" href="#dom-speechsynthesis-speak" id="ref-for-dom-speechsynthesis-speak①">speak()</a></code> method call, this attribute has been set to one of the <code class="idl"><a data-link-type="idl" href="#speechsynthesisvoice" id="ref-for-speechsynthesisvoice③">SpeechSynthesisVoice</a></code> objects returned by <code class="idl"><a data-link-type="idl" href="#dom-speechsynthesis-getvoices" id="ref-for-dom-speechsynthesis-getvoices①">getVoices()</a></code>, then the user agent must use that voice.
   If this attribute is unset or null at the time of the <code class="idl"><a data-link-type="idl" href="#dom-speechsynthesis-speak" id="ref-for-dom-speechsynthesis-speak②">speak()</a></code> method call, then the user agent must use a user agent default voice.
-  The user agent default voice should support the current language (see <code class="idl"><a data-link-type="idl" href="#dom-speechsynthesisutterance-lang" id="ref-for-dom-speechsynthesisutterance-lang①">lang</a></code>) and can be a local or remote speech service and can incorporate end user choices via interfaces provided by the user agent such as browser configuration parameters. 
+  The user agent default voice should support the current language (see <code class="idl"><a data-link-type="idl" href="#dom-speechsynthesisutterance-lang" id="ref-for-dom-speechsynthesisutterance-lang①">lang</a></code>) and can be a local or remote speech service and can incorporate end user choices via interfaces provided by the user agent such as browser configuration parameters.
+  
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisUtterance" data-dfn-type="attribute" data-export id="dom-speechsynthesisutterance-volume"><code>volume</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-float" id="ref-for-idl-float①⓪">float</a></span>
     <dd>This attribute specifies the speaking volume for the utterance.
   It ranges between 0 and 1 inclusive, with 0 being the lowest volume and 1 the highest volume, with a default of 1.
@@ -1642,7 +1711,8 @@ These events do not bubble and are not cancelable.</p>
   Adding the utterance to the queue while the global SpeechSynthesis instance is in the paused state, and then calling the resume method
   does not cause the resume event to be fired, in this case the utterance’s <a class="idl-code" data-link-type="event" href="#eventdef-speechsynthesisutterance-start" id="ref-for-eventdef-speechsynthesisutterance-start">start</a> event will be called when the utterance starts.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisUtterance" data-dfn-type="event" data-export id="eventdef-speechsynthesisutterance-mark"><code>mark</code></dfn> event
-    <dd>Fired when the spoken utterance reaches a named "mark" tag in SSML. <a data-link-type="biblio" href="#biblio-ssml" title="Speech Synthesis Markup Language (SSML) Version 1.1">[SSML]</a> The user agent must fire this event if the speech synthesis engine provides the event.
+    <dd>Fired when the spoken utterance reaches a named "mark" tag in SSML. <a data-link-type="biblio" href="#biblio-ssml" title="Speech Synthesis Markup Language (SSML) Version 1.1">[SSML]</a>
+  The user agent must fire this event if the speech synthesis engine provides the event.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisUtterance" data-dfn-type="event" data-export id="eventdef-speechsynthesisutterance-boundary"><code>boundary</code></dfn> event
     <dd>Fired when the spoken utterance reaches a word or sentence boundary.
   The user agent must fire this event if the speech synthesis engine provides the event.
@@ -1663,7 +1733,8 @@ These events do not bubble and are not cancelable.</p>
     <dd>This attribute indicates the time, in seconds, that this event triggered, relative to when this utterance has begun to be spoken.
   The user agent must return this value if the speech synthesis engine supports it or the user agent can otherwise determine it, otherwise the user agent must return 0.
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisEvent" data-dfn-type="attribute" data-export id="dom-speechsynthesisevent-name"><code>name</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString②⑥">DOMString</a>, readonly</span>
-    <dd>For <a class="idl-code" data-link-type="event" href="#eventdef-speechsynthesisutterance-mark" id="ref-for-eventdef-speechsynthesisutterance-mark">mark</a> events, this attribute indicates the name of the marker, as defined in SSML as the name attribute of a mark element. <a data-link-type="biblio" href="#biblio-ssml" title="Speech Synthesis Markup Language (SSML) Version 1.1">[SSML]</a> For <a class="idl-code" data-link-type="event" href="#eventdef-speechsynthesisutterance-boundary" id="ref-for-eventdef-speechsynthesisutterance-boundary">boundary</a> events, this attribute indicates the type of boundary that caused the event: "word" or "sentence".
+    <dd>For <a class="idl-code" data-link-type="event" href="#eventdef-speechsynthesisutterance-mark" id="ref-for-eventdef-speechsynthesisutterance-mark">mark</a> events, this attribute indicates the name of the marker, as defined in SSML as the name attribute of a mark element. <a data-link-type="biblio" href="#biblio-ssml" title="Speech Synthesis Markup Language (SSML) Version 1.1">[SSML]</a>
+  For <a class="idl-code" data-link-type="event" href="#eventdef-speechsynthesisutterance-boundary" id="ref-for-eventdef-speechsynthesisutterance-boundary">boundary</a> events, this attribute indicates the type of boundary that caused the event: "word" or "sentence".
   For all other events, this value should return "".
    </dl>
    <h4 class="heading settled" data-level="4.2.7" id="speechsynthesiserrorevent-attributes"><span class="secno">4.2.7. </span><span class="content">SpeechSynthesisErrorEvent Attributes</span><a class="self-link" href="#speechsynthesiserrorevent-attributes"></a></h4>
@@ -1672,7 +1743,8 @@ These events do not bubble and are not cancelable.</p>
     <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisErrorEvent" data-dfn-type="attribute" data-export id="dom-speechsynthesiserrorevent-error"><code>error</code></dfn> attribute, <span> of type <a data-link-type="idl-name" href="#enumdef-speechsynthesiserrorcode" id="ref-for-enumdef-speechsynthesiserrorcode②">SpeechSynthesisErrorCode</a>, readonly</span>
     <dd>
      The errorCode is an enumeration indicating what has gone wrong.
-  The values are: 
+  The values are:
+  
      <dl>
       <dt><dfn class="dfn-paneled idl-code" data-dfn-for="SpeechSynthesisErrorCode" data-dfn-type="enum-value" data-export id="dom-speechsynthesiserrorcode-canceled"><code>"canceled"</code></dfn>
       <dd>A cancel method call caused the SpeechSynthesisUtterance to be removed from the queue before it had begun being spoken.
@@ -1725,7 +1797,8 @@ These events do not bubble and are not cancelable.</p>
    <p><em>This section is non-normative.</em></p>
    <h3 class="heading settled" data-level="5.1" id="examples-recognition"><span class="secno">5.1. </span><span class="content">Speech Recognition Examples</span><a class="self-link" href="#examples-recognition"></a></h3>
    <div class="example" id="input-field">
-    <a class="self-link" href="#input-field"></a> 
+    <a class="self-link" href="#input-field"></a>
+  
     <p>Using speech recognition to fill an input-field and perform a web search.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   <c- a>var</c-> recognition <c- o>=</c-> <c- ow>new</c-> SpeechRecognition<c- p>();</c->
@@ -1744,7 +1817,8 @@ These events do not bubble and are not cancelable.</p>
 </pre>
    </div>
    <div class="example" id="fill-option-list">
-    <a class="self-link" href="#fill-option-list"></a> 
+    <a class="self-link" href="#fill-option-list"></a>
+  
     <p>Using speech recognition to fill an options list with alternative speech results.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   <c- a>var</c-> recognition <c- o>=</c-> <c- ow>new</c-> SpeechRecognition<c- p>();</c->
@@ -1770,7 +1844,8 @@ These events do not bubble and are not cancelable.</p>
 </pre>
    </div>
    <div class="example" id="fill-textarea">
-    <a class="self-link" href="#fill-textarea"></a> 
+    <a class="self-link" href="#fill-textarea"></a>
+  
     <p>Using continuous speech recognition to fill a textarea.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>textarea</c-> <c- e>id</c-><c- o>=</c-><c- s>"textarea"</c-> <c- e>rows</c-><c- o>=</c-><c- s>10</c-> <c- e>cols</c-><c- o>=</c-><c- s>80</c-><c- p>>&lt;/</c-><c- f>textarea</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>button</c-> <c- e>id</c-><c- o>=</c-><c- s>"button"</c-> <c- e>onclick</c-><c- o>=</c-><c- s>"toggleStartStop()"</c-><c- p>>&lt;/</c-><c- f>button</c-><c- p>></c->
@@ -1809,7 +1884,8 @@ These events do not bubble and are not cancelable.</p>
 </pre>
    </div>
    <div class="example" id="continuous-recognition">
-    <a class="self-link" href="#continuous-recognition"></a> 
+    <a class="self-link" href="#continuous-recognition"></a>
+  
     <p>Using continuous speech recognition, showing final results in black and interim results in grey.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>button</c-> <c- e>id</c-><c- o>=</c-><c- s>"button"</c-> <c- e>onclick</c-><c- o>=</c-><c- s>"toggleStartStop()"</c-><c- p>>&lt;/</c-><c- f>button</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>div</c-> <c- e>style</c-><c- o>=</c-><c- s>"border:dotted;padding:10px"</c-><c- p>></c->
@@ -1861,7 +1937,8 @@ These events do not bubble and are not cancelable.</p>
    </div>
    <h3 class="heading settled" data-level="5.2" id="examples-synthesis"><span class="secno">5.2. </span><span class="content">Speech Synthesis Examples</span><a class="self-link" href="#examples-synthesis"></a></h3>
    <div class="example" id="speak-text">
-    <a class="self-link" href="#speak-text"></a> 
+    <a class="self-link" href="#speak-text"></a>
+  
     <p>Spoken text.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   speechSynthesis<c- p>.</c->speak<c- p>(</c-><c- ow>new</c-> SpeechSynthesisUtterance<c- p>(</c-><c- t>'Hello World'</c-><c- p>));</c->
@@ -1869,7 +1946,8 @@ These events do not bubble and are not cancelable.</p>
 </pre>
    </div>
    <div class="example" id="speak-text-advanced">
-    <a class="self-link" href="#speak-text-advanced"></a> 
+    <a class="self-link" href="#speak-text-advanced"></a>
+  
     <p>Spoken text with attributes and events.</p>
 <pre class="lang-html highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>type</c-><c- o>=</c-><c- s>"text/javascript"</c-><c- p>></c->
   <c- a>var</c-> u <c- o>=</c-> <c- ow>new</c-> SpeechSynthesisUtterance<c- p>();</c->
@@ -1882,7 +1960,8 @@ These events do not bubble and are not cancelable.</p>
 </pre>
    </div>
    <h2 class="no-num heading settled" id="acknowledgments"><span class="content">Acknowledgments</span><a class="self-link" href="#acknowledgments"></a></h2>
-   <p style="white-space: pre-line"> Adam Sobieski (Phoster)
+   <p style="white-space: pre-line">
+  Adam Sobieski (Phoster)
   Björn Bringert (Google)
   Charles Pritchard
   Dominic Mazzoni (Google)
@@ -1894,7 +1973,8 @@ These events do not bubble and are not cancelable.</p>
   Olli Pettay (Mozilla)
   Peter Beverloo (Google)
   Raj Tumuluri (Openstream)
-  Satish Sampath (Google) </p>
+  Satish Sampath (Google)
+</p>
    <p>Also, the members of the HTML Speech Incubator Group, and the corresponding <a data-link-type="biblio" href="#biblio-htmlspeech" title="HTML Speech Incubator Group Final Report">Final Report</a>, which created the basis for this specification.</p>
   </main>
   <div data-fill-with="conformance">
@@ -1907,21 +1987,31 @@ These events do not bubble and are not cancelable.</p>
     in the normative parts of this document
     are to be interpreted as described in RFC 2119.
     However, for readability,
-    these words do not appear in all uppercase letters in this specification. </p>
+    these words do not appear in all uppercase letters in this specification.
+
+    </p>
    <p>All of the text of this specification is normative
-    except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a> </p>
+    except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a>
+
+    </p>
    <p>Examples in this specification are introduced with the words “for example”
     or are set apart from the normative text
     with <code>class="example"</code>,
-    like this: </p>
+    like this:
+
+    </p>
    <div class="example" id="w3c-example">
-    <a class="self-link" href="#w3c-example"></a> 
-    <p>This is an example of an informative example. </p>
+    <a class="self-link" href="#w3c-example"></a>
+        
+    <p>This is an example of an informative example.
+    </p>
    </div>
    <p>Informative notes begin with the word “Note”
     and are set apart from the normative text
     with <code>class="note"</code>,
-    like this: </p>
+    like this:
+
+    </p>
    <p class="note" role="note">Note, this is an informative note.</p>
   </div>
   <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
@@ -2234,6 +2324,13 @@ These events do not bubble and are not cancelable.</p>
      <li><span class="dfn-paneled" id="bcc085e3">request permission to use</span>
     </ul>
    <li>
+    <a data-link-type="biblio">[PERMISSIONS-POLICY-1]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="333b39ba">'self'</span>
+     <li><span class="dfn-paneled" id="1570624a">default allowlist</span>
+     <li><span class="dfn-paneled" id="cc890cc1">policy-controlled feature</span>
+    </ul>
+   <li>
     <a data-link-type="biblio">[SERVICE-WORKERS]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="3a3c984c">task queues</span>
@@ -2273,6 +2370,8 @@ These events do not bubble and are not cancelable.</p>
    <dd>Cullen Jennings; et al. <a href="https://w3c.github.io/mediacapture-main/"><cite>Media Capture and Streams</cite></a>. URL: <a href="https://w3c.github.io/mediacapture-main/">https://w3c.github.io/mediacapture-main/</a>
    <dt id="biblio-permissions">[PERMISSIONS]
    <dd>Marcos Caceres; Mike Taylor. <a href="https://w3c.github.io/permissions/"><cite>Permissions</cite></a>. URL: <a href="https://w3c.github.io/permissions/">https://w3c.github.io/permissions/</a>
+   <dt id="biblio-permissions-policy-1">[PERMISSIONS-POLICY-1]
+   <dd>Ian Clelland. <a href="https://w3c.github.io/webappsec-permissions-policy/"><cite>Permissions Policy</cite></a>. URL: <a href="https://w3c.github.io/webappsec-permissions-policy/">https://w3c.github.io/webappsec-permissions-policy/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-service-workers">[SERVICE-WORKERS]
@@ -2707,8 +2806,10 @@ let dfnPanelData = {
 "0e3ba9f8": {"dfnID":"0e3ba9f8","dfnText":"fully active","external":true,"refSections":[{"refs":[{"id":"ref-for-fully-active"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-fully-active\u2460"},{"id":"ref-for-fully-active\u2461"}],"title":"4.1.3. AvailabilityStatus Enum Values"}],"url":"https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active"},
 "129bdae8": {"dfnID":"129bdae8","dfnText":"Event","external":true,"refSections":[{"refs":[{"id":"ref-for-event"},{"id":"ref-for-event\u2460"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-event\u2461"}],"title":"4.2. The SpeechSynthesis Interface"}],"url":"https://dom.spec.whatwg.org/#event"},
 "12b8dfc0": {"dfnID":"12b8dfc0","dfnText":"current settings object","external":true,"refSections":[{"refs":[{"id":"ref-for-current-settings-object"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-current-settings-object\u2460"},{"id":"ref-for-current-settings-object\u2461"}],"title":"4.1.3. AvailabilityStatus Enum Values"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object"},
+"1570624a": {"dfnID":"1570624a","dfnText":"default allowlist","external":true,"refSections":[{"refs":[{"id":"ref-for-policy-controlled-feature-default-allowlist"},{"id":"ref-for-policy-controlled-feature-default-allowlist\u2460"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist"},
 "29e497a3": {"dfnID":"29e497a3","dfnText":"kind","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-mediastreamtrack-kind"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-kind"},
 "2bc0cdf4": {"dfnID":"2bc0cdf4","dfnText":"EventTarget","external":true,"refSections":[{"refs":[{"id":"ref-for-eventtarget"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-eventtarget\u2460"},{"id":"ref-for-eventtarget\u2461"}],"title":"4.2. The SpeechSynthesis Interface"}],"url":"https://dom.spec.whatwg.org/#eventtarget"},
+"333b39ba": {"dfnID":"333b39ba","dfnText":"'self'","external":true,"refSections":[{"refs":[{"id":"ref-for-default-allowlist-self"},{"id":"ref-for-default-allowlist-self\u2460"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/webappsec-permissions-policy/#default-allowlist-self"},
 "3349d69f": {"dfnID":"3349d69f","dfnText":"associated Document","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-document-window"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-concept-document-window\u2460"},{"id":"ref-for-concept-document-window\u2461"}],"title":"4.1.3. AvailabilityStatus Enum Values"}],"url":"https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window"},
 "3a3c984c": {"dfnID":"3a3c984c","dfnText":"task queues","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-service-worker-registration-task-queue"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-dfn-service-worker-registration-task-queue\u2460"}],"title":"4.1.3. AvailabilityStatus Enum Values"}],"url":"https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration-task-queue"},
 "4013a022": {"dfnID":"4013a022","dfnText":"this","external":true,"refSections":[{"refs":[{"id":"ref-for-this"},{"id":"ref-for-this\u2460"}],"title":"4.1.3. AvailabilityStatus Enum Values"}],"url":"https://webidl.spec.whatwg.org/#this"},
@@ -2730,6 +2831,7 @@ let dfnPanelData = {
 "bcc085e3": {"dfnID":"bcc085e3","dfnText":"request permission to use","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-request-permission-to-use"}],"title":"4.1.3. AvailabilityStatus Enum Values"}],"url":"https://w3c.github.io/permissions/#dfn-request-permission-to-use"},
 "bdbd19d1": {"dfnID":"bdbd19d1","dfnText":"Promise","external":true,"refSections":[{"refs":[{"id":"ref-for-idl-promise"},{"id":"ref-for-idl-promise\u2460"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-idl-promise\u2461"},{"id":"ref-for-idl-promise\u2462"},{"id":"ref-for-idl-promise\u2463"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://webidl.spec.whatwg.org/#idl-promise"},
 "be2d2b4c": {"dfnID":"be2d2b4c","dfnText":"SyntaxError","external":true,"refSections":[{"refs":[{"id":"ref-for-syntaxerror"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-syntaxerror\u2460"}],"title":"4.1.3. AvailabilityStatus Enum Values"},{"refs":[{"id":"ref-for-syntaxerror\u2461"}],"title":"4.1.10. SpeechRecognitionPhrase"}],"url":"https://webidl.spec.whatwg.org/#syntaxerror"},
+"cc890cc1": {"dfnID":"cc890cc1","dfnText":"policy-controlled feature","external":true,"refSections":[{"refs":[{"id":"ref-for-policy-controlled-feature"},{"id":"ref-for-policy-controlled-feature\u2460"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature"},
 "d36324c1": {"dfnID":"d36324c1","dfnText":"readyState","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-mediastreamtrack-readystate"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-readystate"},
 "dacde8b5": {"dfnID":"dacde8b5","dfnText":"a new promise","external":true,"refSections":[{"refs":[{"id":"ref-for-a-new-promise"},{"id":"ref-for-a-new-promise\u2460"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://webidl.spec.whatwg.org/#a-new-promise"},
 "dictdef-speechrecognitionerroreventinit": {"dfnID":"dictdef-speechrecognitionerroreventinit","dfnText":"SpeechRecognitionErrorEventInit","external":false,"refSections":[{"refs":[{"id":"ref-for-dictdef-speechrecognitionerroreventinit"}],"title":"4.1. The SpeechRecognition Interface"}],"url":"#dictdef-speechrecognitionerroreventinit"},
@@ -3452,6 +3554,9 @@ let refsData = {
 "https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-readystate": {"displayText":"readyState","export":true,"for_":["MediaStreamTrack"],"level":"1","normative":true,"shortname":"mediacapture-streams","spec":"mediacapture-streams","status":"current","text":"readyState","type":"attribute","url":"https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-readystate"},
 "https://w3c.github.io/permissions/#dfn-denied": {"displayText":"\"denied\"","export":true,"for_":["permission"],"level":"1","normative":true,"shortname":"permissions","spec":"permissions","status":"current","text":"\"denied\"","type":"dfn","url":"https://w3c.github.io/permissions/#dfn-denied"},
 "https://w3c.github.io/permissions/#dfn-request-permission-to-use": {"displayText":"request permission to use","export":true,"for_":[],"level":"1","normative":true,"shortname":"permissions","spec":"permissions","status":"current","text":"request permission to use","type":"dfn","url":"https://w3c.github.io/permissions/#dfn-request-permission-to-use"},
+"https://w3c.github.io/webappsec-permissions-policy/#default-allowlist-self": {"displayText":"'self'","export":true,"for_":["default allowlist"],"level":"1","normative":true,"shortname":"permissions-policy","spec":"permissions-policy-1","status":"current","text":"'self'","type":"dfn","url":"https://w3c.github.io/webappsec-permissions-policy/#default-allowlist-self"},
+"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature": {"displayText":"policy-controlled feature","export":true,"for_":[],"level":"1","normative":true,"shortname":"permissions-policy","spec":"permissions-policy-1","status":"current","text":"policy-controlled feature","type":"dfn","url":"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature"},
+"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist": {"displayText":"default allowlist","export":true,"for_":["policy-controlled feature"],"level":"1","normative":true,"shortname":"permissions-policy","spec":"permissions-policy-1","status":"current","text":"default allowlist","type":"dfn","url":"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature-default-allowlist"},
 "https://webidl.spec.whatwg.org/#Exposed": {"displayText":"Exposed","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"Exposed","type":"extended-attribute","url":"https://webidl.spec.whatwg.org/#Exposed"},
 "https://webidl.spec.whatwg.org/#SameObject": {"displayText":"SameObject","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"SameObject","type":"extended-attribute","url":"https://webidl.spec.whatwg.org/#SameObject"},
 "https://webidl.spec.whatwg.org/#SecureContext": {"displayText":"SecureContext","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"SecureContext","type":"extended-attribute","url":"https://webidl.spec.whatwg.org/#SecureContext"},
