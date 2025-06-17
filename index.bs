@@ -148,11 +148,13 @@ For on-device speech recognition, the exact download status of language packs ca
 
 <h4 id="on-device-model-privacy-availability-masking">Download Masking</h4>
 
-One mitigation is for the user agent to mask the current download status by returning {{"downloadable"}} from {{SpeechRecognition/available()}} even if the actual download status is {{"available"}} or {{"downloading"}}.
+To prevent cross-origin fingerprinting and site collusion, user agents <strong>must</strong> partition language pack availability by [=storage key=]. User agents <strong>must</strong> mask the current download status by returning {{"downloadable"}} from {{SpeechRecognition/available()}} by default, even if the actual underlying language pack is {{"available"}} or {{"downloading"}} on the user's device.
 
-Because implementation strategies differ and other mitigations (like permission prompts for {{SpeechRecognition/install()}}) are available, a specific masking scheme is not mandated. For APIs where the user agent believes such masking is necessary, a suggested heuristic is to mask by default, subject to a masking state that is established for each (API, options, [=storage key=]) tuple. This state can be set to "unmasked" once a web page in a given [=storage key=] calls {{SpeechRecognition/install()}} with a given set of options, and successfully starts a download or the promise resolves to `true` (indicating the language pack is ready). Since {{SpeechRecognition/install()}} has stronger requirements (see <a href="#on-device-model-privacy-availability-installation">Installation-time friction</a>), this ensures that web pages only get access to the true download status after taking a more costly and less-repeatable action.
+This masking state is established for each (API, options, [=storage key=]) tuple. The user agent <strong>must only</strong> set the state to "unmasked" for a specific [=storage key=] after a web page within that key explicitly calls {{SpeechRecognition/install()}} with a given set of options, and successfully starts a download or the promise resolves to <code>true</code> (indicating the language pack is ready). 
 
-<strong>Implementations which use such a [=storage key=]-based masking scheme must ensure that the masking state is reset when other storage for that origin is reset.</strong>
+Since {{SpeechRecognition/install()}} has stronger requirements (see <a href="#on-device-model-privacy-availability-installation">Installation-time friction</a>), this ensures that web pages only get access to the true download status after taking a more costly action, such as triggering a user permission prompt.
+
+Implementations <strong>must</strong> ensure that this [=storage key=]-based masking state is cleared whenever other storage for that origin is reset by the user.
 
 <h5 id="on-device-model-privacy-availability-installation">Installation-time friction</h5>
 
@@ -168,11 +170,11 @@ Additionally, initiating the download process via {{SpeechRecognition/install()}
 
 <h5 id="on-device-model-privacy-availability-cancelation">Download Cancelation</h5>
 
-An important part of making the download status a less-useful fingerprinting vector is to ensure that the website cannot toggle the availability state back and forth by starting and then effectively canceling downloads. The Web Speech API's {{SpeechRecognition/install()}} method returns a promise and does not take an {{AbortSignal}} to cancel the download itself ({{SpeechRecognition/abort()}} is for an active recognition session).
+Because the availability of a language pack is strictly partitioned by [=storage key=] (see <a href="#on-device-model-privacy-availability-masking">Download Masking</a>), a web page can only observe the download state within its own partition. 
 
-Once a download is initiated by {{SpeechRecognition/install()}}, the user agent should preserve the download progress. <strong>User agents should not cancel an ongoing language pack download in response to page-controlled actions</strong> (e.g., navigation, page unload) that could be used to manipulate the download state for fingerprinting. If a page navigates away, the download should ideally continue in the background, or at least its progress should be saved. The goal is to prevent the site from easily reverting a language pack's state from {{"downloading"}} back to {{"downloadable"}}.
+Therefore, if a user agent cancels an ongoing download due to page-controlled actions (e.g., navigation, page unload, or an iframe being destroyed), the resulting change in state (e.g., reverting from {{"downloading"}} to {{"downloadable"}}) is only visible to that specific [=storage key=]. This prevents the cancelation behavior from being used as a cross-origin fingerprinting vector. 
 
-Note that canceling downloads in response to explicit, out-of-band user-controlled actions (e.g., via browser UI) is not problematic from this perspective.
+User agents <strong>may</strong> cancel ongoing language pack downloads when the requesting document is destroyed or navigated away from, in accordance with their standard resource management policies.
 
 <h5 id="on-device-model-privacy-availability-eviction">Download Eviction</h5>
 
