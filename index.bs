@@ -512,8 +512,9 @@ following steps:
         1. Abort these steps.
 1. Set {{[[started]]}} to `true`.
 1. If |requestMicrophonePermission| is `true` and [=request
-    permission to use=] "`microphone`" is [=permission/"denied"=], abort
-    these steps.
+    permission to use=] "`microphone`" is [=permission/"denied"=]:
+    1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
+    1. Abort these steps.
 1. Once the system is successfully listening to the recognition, queue a task to
     [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
