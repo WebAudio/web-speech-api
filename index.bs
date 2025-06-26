@@ -163,7 +163,7 @@ The term "interim result" indicates a {{SpeechRecognitionResult}} in which the {
 <dl dfn-type=attribute dfn-for="SpeechRecognition">
     : <dfn>[[phrases]]</dfn>
     ::
-        A {{SpeechRecognitionPhraseList}} representing a list of phrases for contextual biasing. The initial value is null.
+        An {{ObservableArray}} of {{SpeechRecognitionPhrase}} objects representing a list of phrases for contextual biasing. The initial value is a new empty {{ObservableArray}}.
 </dl>
 
 <xmp class="idl">
@@ -178,7 +178,7 @@ interface SpeechRecognition : EventTarget {
     attribute boolean interimResults;
     attribute unsigned long maxAlternatives;
     attribute boolean processLocally;
-    attribute SpeechRecognitionPhraseList phrases;
+    attribute ObservableArray<SpeechRecognitionPhrase> phrases;
 
     // methods to drive the speech interaction
     undefined start();
@@ -298,16 +298,6 @@ interface SpeechRecognitionPhrase {
     readonly attribute DOMString phrase;
     readonly attribute float boost;
 };
-
-// The object representing a list of phrases for contextual biasing.
-[SecureContext, Exposed=Window]
-interface SpeechRecognitionPhraseList {
-    constructor(sequence<SpeechRecognitionPhrase> phrases);
-    readonly attribute unsigned long length;
-    SpeechRecognitionPhrase item(unsigned long index);
-    undefined addItem(SpeechRecognitionPhrase item);
-    undefined removeItem(unsigned long index);
-};
 </xmp>
 
 <h4 id="speechreco-attributes">SpeechRecognition Attributes</h4>
@@ -347,17 +337,10 @@ interface SpeechRecognitionPhraseList {
 
   <dt><dfn attribute for=SpeechRecognition>phrases</dfn> attribute</dt>
   <dd>
-    This attribute represents a list of phrases for contextual biasing.
+    The `phrases` attribute provides a list of {{SpeechRecognitionPhrase}} objects to be used for contextual biasing. This is an {{ObservableArray}}, which can be modified like a JavaScript `Array` (e.g., using `push()`).
   </dd>
   <dd>
     The getter steps are to return the value of {{SpeechRecognition/[[phrases]]}}.
-  </dd>
-  <dd>
-    The setter steps are:
-    1. If the {{SpeechRecognitionPhraseList/length}} of the given value is greater than 0 and the system does not support contextual biasing,
-        throw a {{SpeechRecognitionErrorEvent}} with the {{phrases-not-supported}} error code and abort these steps.
-    1. Set {{SpeechRecognition/[[phrases]]}} to the given value.
-    1. Send a copy of {{SpeechRecognition/[[phrases]]}} to the system for initializing or updating the phrases for contextual biasing implementation.
   </dd>
 </dl>
 
@@ -506,6 +489,9 @@ following steps:
 1. If {{SpeechRecognition/[[started]]}} is `true` and no <a event
     for=SpeechRecognition>error</a> event or <a event for=SpeechRecognition>end</a> event
     has fired on it, throw an {{InvalidStateError}} and abort these steps.
+1. If this.{{SpeechRecognition/phrases}}'s `length` is greater than 0 and the user agent does not support contextual biasing:
+    1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to `phrases-not-supported` and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
+    1. Abort these steps.
 1. If this.{{SpeechRecognition/[[processLocally]]}} is `true`:
     1. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}}, or if it cannot fulfill the local processing requirement for other reasons:
         1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/service-not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
@@ -726,59 +712,6 @@ For a non-continuous recognition it will hold only a single value.</p>
 
   <dt><dfn attribute for=SpeechRecognitionPhrase>boost</dfn> attribute</dt>
   <dd>This attribute returns the value of {{[[boost]]}}.</dd>
-</dl>
-
-<h4 id="speechreco-phraselist">SpeechRecognitionPhraseList</h4>
-
-<p>The SpeechRecognitionPhraseList object holds a list of phrases for contextual biasing and has the following internal slot:</p>
-
-<dl dfn-type=attribute dfn-for="SpeechRecognitionPhraseList">
-    : <dfn>[[phrases]]</dfn>
-    ::
-        A list of {{SpeechRecognitionPhrase}} representing the phrases to be boosted. The initial value is an empty list.
-</dl>
-
-<dl>
-  <dt><dfn constructor for=SpeechRecognitionPhraseList>SpeechRecognitionPhraseList(|phrases|)</dfn> constructor</dt>
-  <dd>
-    When this constructor is invoked, run the following steps:
-    1. Let |list| be a new object of type {{SpeechRecognitionPhraseList}}.
-    1. Set |list|.{{SpeechRecognitionPhraseList/[[phrases]]}} to be the value of |phrases|.
-    1. Return |list|.
-  </dd>
-
-  <dt><dfn attribute for=SpeechRecognitionPhraseList>length</dfn> attribute</dt>
-  <dd>
-    This attribute indicates the number of phrases in the list.
-    When invoked, return the number of items in {{SpeechRecognitionPhraseList/[[phrases]]}}.
-  </dd>
-
-  <dt><dfn method for=SpeechRecognitionPhraseList>item(|index|)</dfn> method</dt>
-  <dd>
-    This method gets the {{SpeechRecognitionPhrase}} object at the |index| of the list.
-    When invoked, run the following steps:
-    1. If |index| is smaller than 0, or greater than or equal to {{SpeechRecognitionPhraseList/length}},
-        throw a {{RangeError}} and abort these steps.
-    1. Return the {{SpeechRecognitionPhrase}} at the |index| of {{SpeechRecognitionPhraseList/[[phrases]]}}.
-  </dd>
-
-  <dt><dfn method for=SpeechRecognitionPhraseList>addItem(|item|)</dfn> method</dt>
-  <dd>
-    This method adds the {{SpeechRecognitionPhrase}} object |item| to the list.
-    When invoked, add |item| to the end of {{SpeechRecognitionPhraseList/[[phrases]]}}.
-    The list is allowed to have multiple {{SpeechRecognitionPhrase}} objects with the same {{SpeechRecognitionPhrase/[[phrase]]}} value,
-    and the speech recognition model should use the last {{SpeechRecognitionPhrase/[[boost]]}} value
-    for this {{SpeechRecognitionPhrase/[[phrase]]}} in the list.
-  </dd>
-
-  <dt><dfn method for=SpeechRecognitionPhraseList>removeItem(|index|)</dfn> method</dt>
-  <dd>
-    This method removes the {{SpeechRecognitionPhrase}} object at the |index| of the list.
-    When invoked, run the following steps:
-    1. If |index| is smaller than 0, or greater than or equal to {{SpeechRecognitionPhraseList/length}},
-        throw a {{RangeError}} and abort these steps.
-    1. Remove the {{SpeechRecognitionPhrase}} object at the |index| of {{SpeechRecognitionPhraseList/[[phrases]]}}.
-  </dd>
 </dl>
 
 <h4 id="speechreco-speechgrammar">SpeechGrammar</h4>
