@@ -30,10 +30,10 @@ A web-based application for doctors could be biased towards recognizing complex 
 
 ## New API Components
 
-Contextual biasing is implemented through a new `phrases` attribute on the `SpeechRecognition` interface, which uses two new supporting interfaces: `SpeechRecognitionPhrase` and `SpeechRecognitionPhraseList`.
+Contextual biasing is implemented through a new `phrases` attribute on the `SpeechRecognition` interface, which uses the new `SpeechRecognitionPhrase` interface.
 
 ### 1. `SpeechRecognition.phrases` attribute
-This attribute is assigned a `SpeechRecognitionPhraseList` object to provide contextual hints for the recognition session.
+This attribute is an `ObservableArray<SpeechRecognitionPhrase>` that allows developers to provide contextual hints for the recognition session. It can be modified like a JavaScript `Array`.
 
 ### 2. `SpeechRecognitionPhrase` interface
 Represents a single phrase and its associated boost value.
@@ -42,27 +42,27 @@ Represents a single phrase and its associated boost value.
 - `phrase`: The text string to be boosted.
 - `boost`: A float between 0.0 and 10.0. Higher values make the phrase more likely to be recognized.
 
-### 3. `SpeechRecognitionPhraseList` interface
-Represents a collection of `SpeechRecognitionPhrase` objects. It can be created with an array of phrases and managed dynamically with `addItem()` and `removeItem()` methods.
 
 ### Example Usage
 
 ```javascript
 // A list of phrases relevant to our application's context.
-const phrases = [
+const phraseData = [
   { phrase: 'Zoltan', boost: 3.0 },
   { phrase: 'Grog', boost: 2.0 },
 ];
 
 // Create SpeechRecognitionPhrase objects.
-const phrases = phrases.map(p => new SpeechRecognitionPhrase(p.phrase, p.boost));
-
-// Create a SpeechRecognitionPhraseList.
-const phraseList = new SpeechRecognitionPhraseList(phrases);
+const phraseObjects = phraseData.map(p => new SpeechRecognitionPhrase(p.phrase, p.boost));
 
 const recognition = new SpeechRecognition();
-// Assign the phrase list to the recognition instance.
-recognition.phrases = phraseList;
+
+// Assign the phrase objects to the recognition instance.
+// The attribute is an ObservableArray, so we can assign an array to it.
+recognition.phrases = phraseObjects;
+
+// We can also dynamically add/remove phrases.
+recognition.phrases.push(new SpeechRecognitionPhrase('Xylia', 2.5));
 
 // Some user agents (e.g. Chrome) might only support on-device contextual biasing.
 recognition.processLocally = true;
