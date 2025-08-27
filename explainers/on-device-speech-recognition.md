@@ -11,7 +11,7 @@ The Web Speech API is a powerful browser feature that enables applications to pe
 To address these issues, we introduce **on-device speech recognition capabilities** as part of the Web Speech API. This enhancement allows speech recognition to run locally on user devices, providing a faster, more private, and offline-compatible experience.
 
 ## Why Use On-Device Speech Recognition?
-
+ 
 ### 1. **Privacy**
 On-device processing ensures that neither raw audio nor transcriptions leave the user's device, enhancing data security and user trust.
 
@@ -20,6 +20,36 @@ Local processing reduces latency, providing a smoother and faster user experienc
 
 ### 3. **Offline Functionality**
 Applications can offer speech recognition capabilities even without an active internet connection, increasing their utility in remote or low-connectivity environments.
+## New API Members
+
+This enhancement introduces new members to the Web Speech API to support on-device recognition: a dictionary for configuration, an instance attribute, and static methods for managing capabilities.
+
+### `SpeechRecognitionOptions` Dictionary
+
+This dictionary is used to configure speech recognition preferences, both for individual sessions and for querying or installing capabilities.
+
+It includes the following members:
+
+- `langs`: A required sequence of `DOMString` representing BCP-47 language tags (e.g., `['en-US']`).
+- `processLocally`: A boolean that, if `true`, instructs the recognition to be performed on-device. If `false` (the default), any available recognition method (cloud-based or on-device) may be used.
+
+
+```idl
+dictionary SpeechRecognitionOptions {
+  required sequence<DOMString> langs; // BCP-47 language tags
+  boolean processLocally = false;  // Instructs the recognition to be performed on-device. If `false` (default), any available recognition method may be used.
+};
+```
+
+#### Example Usage
+```javascript
+const recognition = new SpeechRecognition();
+recognition.options = {
+  langs: ['en-US'],
+  processLocally: true
+};
+recognition.start();
+```
 
 ## Example use cases
 ### 1. Company with data residency requirements
@@ -31,57 +61,74 @@ Some websites would only adopt the Web Speech API if it meets strict performance
 ### 3. Educational website (e.g. khanacademy.org)
 Applications that need to function in unreliable or offline network conditions—such as voice-based productivity tools, educational software, or accessibility features—benefit from on-device speech recognition. This enables uninterrupted functionality during flights, remote travel, or in areas with limited connectivity. When on-device recognition is unavailable, a website can choose to hide the UI or gracefully degrade functionality to maintain a coherent user experience.
 
-## New Methods
+## New API Components
 
-### 1. `Promise<boolean> availableOnDevice(DOMString lang)`
-This method checks if on-device speech recognition is available for a specific language. Developers can use this to determine whether to enable features that require on-device speech recognition.
+### 1. `static Promise<AvailabilityStatus> SpeechRecognition.available(SpeechRecognitionOptions options)`
+This static method checks the availability of speech recognition capabilities matching the provided `SpeechRecognitionOptions`.
+
+The method returns a `Promise` that resolves to an `AvailabilityStatus` enum string:
+- `"available"`: Ready to use according to the specified options.
+- `"downloadable"`: Not currently available, but resources (e.g., language packs for on-device) can be downloaded.
+- `"downloading"`: Resources are currently being downloaded.
+- `"unavailable"`: Not available and not downloadable.
 
 #### Example Usage
 ```javascript
-const lang = 'en-US';
-SpeechRecognition.availableOnDevice(lang).then((available) => {
-    if (available) {
-        console.log(`On-device speech recognition is available for ${lang}.`);
+// Check availability for on-device English (US)
+const options = { langs: ['en-US'], processLocally: true };
+
+SpeechRecognition.available(options).then((status) => {
+    console.log(`Speech recognition status for ${options.langs.join(', ')} (on-device): ${status}.`);
+    if (status === 'available') {
+        console.log('Ready to use on-device speech recognition.');
+    } else if (status === 'downloadable') {
+        console.log('Resources are downloadable. Call install() if needed.');
+    } else if (status === 'downloading') {
+        console.log('Resources are currently downloading.');
     } else {
-        console.log(`On-device speech recognition is not available for ${lang}.`);
+        console.log('Not available for on-device speech recognition.');
     }
 });
 ```
 
-### 2. `Promise<boolean> installOnDevice(DOMString[] lang)`
-This method install the resources required for on-device speech recognition for the given BCP-47 language codes. The installation process may download and configure necessary language models.
+### 2. `Promise<boolean> install(SpeechRecognitionOptions options)`
+This method installs the resources required for speech recognition matching the provided `SpeechRecognitionOptions`. The installation process may download and configure necessary language models.
 
 #### Example Usage
 ```javascript
-const lang = 'en-US';
-SpeechRecognition.installOnDevice([lang]).then((success) => {
+// Install on-device resources for English (US)
+const options = { langs: ['en-US'], processLocally: true };
+SpeechRecognition.install(options).then((success) => {
     if (success) {
-        console.log('On-device speech recognition resources installed successfully.');
+        console.log(`On-device speech recognition resources for ${options.langs.join(', ')} installed successfully.`);
     } else {
-        console.error('Unable to install on-device speech recognition.');
+        console.error(`Unable to install on-device speech recognition resources for ${options.langs.join(', ')}. This could be due to unsupported languages or download issues.`);
     }
 });
 ```
 
-## New Attribute
-
-### 1. `mode` attribute in the `SpeechRecognition` interface
-The `mode` attribute in the `SpeechRecognition` interface defines how speech recognition should behave when starting a session.
-
-#### `SpeechRecognitionMode` Enum
-
-- **"on-device-preferred"**: Use on-device speech recognition if available. If not, fall back to cloud-based speech recognition.
-- **"on-device-only"**: Only use on-device speech recognition. If it's unavailable, throw an error.
-
-#### Example Usage
-```javascript
-const recognition = new SpeechRecognition();
-recognition.mode = "ondevice-only"; // Only use on-device speech recognition.
-recognition.start();
-```
+## Supported languages
+The availability of on-device speech recognition languages is user-agent dependent. As an example, Google Chrome supports the following languages for on-device recognition:
+* de-DE (German, Germany)
+* en-US (English, United States)
+* es-ES (Spanish, Spain)
+* fr-FR (French, France)
+* hi-IN (Hindi, India)
+* id-ID (Indonesian, Indonesia)
+* it-IT (Italian, Italy)
+* ja-JP (Japanese, Japan)
+* ko-KR (Korean, South Korea)
+* pl-PL (Polish, Poland)
+* pt-BR (Portuguese, Brazil)
+* ru-RU (Russian, Russia)
+* th-TH (Thai, Thailand)
+* tr-TR (Turkish, Turkey)
+* vi-VN (Vietnamese, Vietnam)
+* zh-CN (Chinese, Mandarin, Simplified)
+* zh-TW (Chinese, Mandarin, Traditional)
 
 ## Privacy considerations
-To reduce the risk of fingerprinting, user agents must implementing privacy-preserving countermeasures. The Web Speech API will employ the same masking techniques used by the [Web Translation API](https://github.com/webmachinelearning/writing-assistance-apis/pull/47).
+To reduce the risk of fingerprinting, user agents must implement privacy-preserving countermeasures. The Web Speech API will employ the same masking techniques used by the [Web Translation API](https://github.com/webmachinelearning/writing-assistance-apis/pull/47).
 
 ## Conclusion
 The addition of on-device speech recognition capabilities to the Web Speech API marks a significant step forward in creating more private, performant, and accessible web applications. By leveraging these new methods, developers can enhance user experiences while addressing key concerns around privacy and connectivity.
