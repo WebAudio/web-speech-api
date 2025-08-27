@@ -47,10 +47,12 @@ This dictionary is used to configure speech recognition preferences, both for in
 
 It includes the following members:
 
+- `langs`: A required sequence of `DOMString` representing BCP-47 language tags (e.g., `['en-US']`).
 - `processLocally`: A boolean that, if `true`, instructs the recognition to be performed on-device. If `false` (the default), any available recognition method (cloud-based or on-device) may be used.
 
 ```idl
 dictionary SpeechRecognitionOptions {
+  required sequence<DOMString> langs; // BCP-47 language tags
   boolean processLocally = false;  // Instructs the recognition to be performed on-device. If `false` (default), any available recognition method may be used.
 };
 ```
@@ -65,7 +67,7 @@ Some websites would only adopt the Web Speech API if it meets strict performance
 ### 3. Educational website (e.g. khanacademy.org)
 Applications that need to function in unreliable or offline network conditions—such as voice-based productivity tools, educational software, or accessibility features—benefit from on-device speech recognition. This enables uninterrupted functionality during flights, remote travel, or in areas with limited connectivity. When on-device recognition is unavailable, a website can choose to hide the UI or gracefully degrade functionality to maintain a coherent user experience.
 
-## New Methods
+## New API Components
 
 ### 1. `static Promise<AvailabilityStatus> SpeechRecognition.available(SpeechRecognitionOptions options)`
 This static method checks the availability of speech recognition capabilities matching the provided `SpeechRecognitionOptions`.
@@ -110,6 +112,26 @@ SpeechRecognition.install(options).then((success) => {
     }
 });
 ```
+
+## Supported languages
+The availability of on-device speech recognition languages is user-agent dependent. As an example, Google Chrome supports the following languages for on-device recognition:
+* de-DE (German, Germany)
+* en-US (English, United States)
+* es-ES (Spanish, Spain)
+* fr-FR (French, France)
+* hi-IN (Hindi, India)
+* id-ID (Indonesian, Indonesia)
+* it-IT (Italian, Italy)
+* ja-JP (Japanese, Japan)
+* ko-KR (Korean, South Korea)
+* pl-PL (Polish, Poland)
+* pt-BR (Portuguese, Brazil)
+* ru-RU (Russian, Russia)
+* th-TH (Thai, Thailand)
+* tr-TR (Turkish, Turkey)
+* vi-VN (Vietnamese, Vietnam)
+* zh-CN (Chinese, Mandarin, Simplified)
+* zh-TW (Chinese, Mandarin, Traditional)
 
 ## Privacy considerations
 To reduce the risk of fingerprinting, user agents must implement privacy-preserving countermeasures. The Web Speech API will employ the same masking techniques used by the [Web Translation API](https://github.com/webmachinelearning/writing-assistance-apis/pull/47).
