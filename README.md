@@ -1,4 +1,7 @@
-# Web Speech API
+# Web Speech API (UNOFFICIAL INCUBATION - NOT A WEB STANDARD)
+
+This is an incubaiton with no official status. This is not a standard.
+It is being incubated by the [Web Audio Community Group](https://www.w3.org/groups/cg/audio-comgp/).
 
 This is the source for the [Web Speech API](https://webaudio.github.io/web-speech-api/) spec.
 
