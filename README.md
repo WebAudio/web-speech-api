@@ -5,7 +5,6 @@ It is being incubated by the [Web Audio Community Group](https://www.w3.org/grou
 
 This is the source for the [Web Speech API](https://webaudio.github.io/web-speech-api/) spec.
 
-
 ## Tests
 
 For normative changes, a corresponding
