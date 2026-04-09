@@ -248,7 +248,7 @@ interface SpeechRecognitionAlternative {
 [SecureContext, Exposed=Window]
 interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
-    getter SpeechRecognitionAlternative item(unsigned long index);
+    getter SpeechRecognitionAlternative? item(unsigned long index);
     readonly attribute boolean isFinal;
 };
 
@@ -256,7 +256,7 @@ interface SpeechRecognitionResult {
 [SecureContext, Exposed=Window]
 interface SpeechRecognitionResultList {
     readonly attribute unsigned long length;
-    getter SpeechRecognitionResult item(unsigned long index);
+    getter SpeechRecognitionResult? item(unsigned long index);
 };
 
 // A full response, which could be interim or final, part of a continuous response or not
@@ -284,7 +284,7 @@ interface SpeechGrammar {
 interface SpeechGrammarList {
     constructor();
     readonly attribute unsigned long length;
-    getter SpeechGrammar item(unsigned long index);
+    getter SpeechGrammar? item(unsigned long index);
     undefined addFromURI(DOMString src,
                     optional float weight = 1.0);
     undefined addFromString(DOMString string,
@@ -742,6 +742,7 @@ This structure has the following attributes:</p>
 
   <dt><dfn method for=SpeechGrammarList>item(<var>index</var>)</dfn> getter</dt>
   <dd>The item getter returns a SpeechGrammar from the index into an array of grammars.
+  If index is greater than or equal to length, this returns null.
   The user agent must ensure that the length attribute is set to the number of elements in the array.
   The user agent must ensure that the index order from smallest to largest matches the order in which grammars were added to the array.</dd>
 
