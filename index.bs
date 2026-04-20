@@ -408,6 +408,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
     When invoked, run these steps:
     1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
+    1. If {{SpeechRecognitionOptions/langs}} of <var>options</var> is an empty sequence, return a resolved {{Promise}} with false and abort these steps.
     1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
     1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
     1. Let <var>promise</var> be <a>a new promise</a>.
