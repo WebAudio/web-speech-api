@@ -185,7 +185,7 @@ interface SpeechRecognition : EventTarget {
     undefined start(MediaStreamTrack audioTrack);
     undefined stop();
     undefined abort();
-    static Promise<AvailabilityStatus> available(SpeechRecognitionOptions options);
+    static Promise<SpeechRecognitionAvailabilityStatus> available(SpeechRecognitionOptions options);
     static Promise<boolean> install(SpeechRecognitionOptions options);
 
     // event methods
@@ -218,7 +218,7 @@ enum SpeechRecognitionErrorCode {
     "phrases-not-supported"
 };
 
-enum AvailabilityStatus {
+enum SpeechRecognitionAvailabilityStatus {
     "unavailable",
     "downloadable",
     "downloading",
@@ -389,7 +389,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
   <dt><dfn method for=SpeechRecognition>available({{SpeechRecognitionOptions}} options)</dfn> method</dt>
   <dd>
-    The {{SpeechRecognition/available}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the recognition availability matching the {{SpeechRecognitionOptions}} argument.
+    The {{SpeechRecognition/available}} method returns a {{Promise}} that resolves to a {{SpeechRecognitionAvailabilityStatus}} indicating the recognition availability matching the {{SpeechRecognitionOptions}} argument.
     Access to this method is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which has a [=policy-controlled feature/default allowlist=] of <code>[=default allowlist/'self'=]</code>.
 
     When invoked, run these steps:
@@ -428,21 +428,21 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
 </dl>
 
-<h4 id="availability-status-values">AvailabilityStatus Enum Values</h4>
-<p>The {{AvailabilityStatus}} enum indicates the availability of speech recognition capabilities. Its values are:</p>
+<h4 id="availability-status-values">SpeechRecognitionAvailabilityStatus Enum Values</h4>
+<p>The {{SpeechRecognitionAvailabilityStatus}} enum indicates the availability of speech recognition capabilities. Its values are:</p>
 <dl>
-  <dt><dfn enum-value for="AvailabilityStatus">"unavailable"</dfn></dt>
+  <dt><dfn enum-value for="SpeechRecognitionAvailabilityStatus">"unavailable"</dfn></dt>
   <dd>Indicates that speech recognition is not available for the specified language(s) and processing preference.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `true`, this means on-device recognition for the language is not supported by the user agent.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `false`, it means neither local nor remote recognition is available for at least one of the specified languages.</dd>
 
-  <dt><dfn enum-value for="AvailabilityStatus">"downloadable"</dfn></dt>
+  <dt><dfn enum-value for="SpeechRecognitionAvailabilityStatus">"downloadable"</dfn></dt>
   <dd>Indicates that on-device speech recognition for the specified language(s) is supported by the user agent but not yet installed. It can potentially be installed using the {{SpeechRecognition/install()}} method. This status is primarily relevant when {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true.</dd>
 
-  <dt><dfn enum-value for="AvailabilityStatus">"downloading"</dfn></dt>
+  <dt><dfn enum-value for="SpeechRecognitionAvailabilityStatus">"downloading"</dfn></dt>
   <dd>Indicates that on-device speech recognition for the specified language(s) is currently in the process of being downloaded. This status is primarily relevant when {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true.</dd>
 
-  <dt><dfn enum-value for="AvailabilityStatus">"available"</dfn></dt>
+  <dt><dfn enum-value for="SpeechRecognitionAvailabilityStatus">"available"</dfn></dt>
   <dd>Indicates that speech recognition is available for all specified language(s) and the given processing preference.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true, this means on-device recognition is installed and ready.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is false, it means recognition (which could be local or remote) is available.</dd>
@@ -453,23 +453,23 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 1. Let <var>langs</var> be {{SpeechRecognitionOptions/langs}} of <var>options</var>.
 1. If any <var>lang</var> in <var>langs</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `false`:
-    1. If <var>langs</var> is an empty sequence, let <var>status</var> be {{AvailabilityStatus/unavailable}}.
-    1. Else if speech recognition (which may be remote) is available for all <var>language</var> in <var>langs</var>, let <var>status</var> be {{AvailabilityStatus/available}}.
-    1. Else, let <var>status</var> be {{AvailabilityStatus/unavailable}}.
+    1. If <var>langs</var> is an empty sequence, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/unavailable}}.
+    1. Else if speech recognition (which may be remote) is available for all <var>language</var> in <var>langs</var>, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/available}}.
+    1. Else, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/unavailable}}.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `true`:
       <ol type=a>
-        <li>If <var>langs</var> is an empty sequence, let <var>status</var> be {{AvailabilityStatus/unavailable}}.</li>
+        <li>If <var>langs</var> is an empty sequence, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/unavailable}}.</li>
         <li>Else:
           <ol type=i>
-            <li>Let <var>finalStatus</var> be {{AvailabilityStatus/available}}.</li>
+            <li>Let <var>finalStatus</var> be {{SpeechRecognitionAvailabilityStatus/available}}.</li>
             <li>For each <var>language</var> in <var>langs</var>:
               <ol>
                 <li>Let <var>currentLanguageStatus</var>.</li>
-                <li>If on-device speech recognition for <var>language</var> is installed, set <var>currentLanguageStatus</var> to {{AvailabilityStatus/available}}.</li>
-                <li>Else if on-device speech recognition for <var>language</var> is currently being downloaded, set <var>currentLanguageStatus</var> to {{AvailabilityStatus/downloading}}.</li>
-                <li>Else if on-device speech recognition for <var>language</var> is supported by the user agent but not yet installed, set <var>currentLanguageStatus</var> to {{AvailabilityStatus/downloadable}}.</li>
-                <li>Else (on-device speech recognition for <var>language</var> is not supported), set <var>currentLanguageStatus</var> to {{AvailabilityStatus/unavailable}}.</li>
-                <li>If <var>currentLanguageStatus</var> comes after <var>finalStatus</var> in the ordered list `[{{AvailabilityStatus/available}}, {{AvailabilityStatus/downloading}}, {{AvailabilityStatus/downloadable}}, {{AvailabilityStatus/unavailable}}]`, set <var>finalStatus</var> to <var>currentLanguageStatus</var>.</li>
+                <li>If on-device speech recognition for <var>language</var> is installed, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/available}}.</li>
+                <li>Else if on-device speech recognition for <var>language</var> is currently being downloaded, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloading}}.</li>
+                <li>Else if on-device speech recognition for <var>language</var> is supported by the user agent but not yet installed, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloadable}}.</li>
+                <li>Else (on-device speech recognition for <var>language</var> is not supported), set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/unavailable}}.</li>
+                <li>If <var>currentLanguageStatus</var> comes after <var>finalStatus</var> in the ordered list `[{{SpeechRecognitionAvailabilityStatus/available}}, {{SpeechRecognitionAvailabilityStatus/downloading}}, {{SpeechRecognitionAvailabilityStatus/downloadable}}, {{SpeechRecognitionAvailabilityStatus/unavailable}}]`, set <var>finalStatus</var> to <var>currentLanguageStatus</var>.</li>
               </ol>
             </li>
             <li>Let <var>status</var> be <var>finalStatus</var>.</li>

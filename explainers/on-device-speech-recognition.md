@@ -63,10 +63,10 @@ Applications that need to function in unreliable or offline network conditionsâ€
 
 ## New API Components
 
-### 1. `static Promise<AvailabilityStatus> SpeechRecognition.available(SpeechRecognitionOptions options)`
+### 1. `static Promise<SpeechRecognitionAvailabilityStatus> SpeechRecognition.available(SpeechRecognitionOptions options)`
 This static method checks the availability of speech recognition capabilities matching the provided `SpeechRecognitionOptions`.
 
-The method returns a `Promise` that resolves to an `AvailabilityStatus` enum string:
+The method returns a `Promise` that resolves to an `SpeechRecognitionAvailabilityStatus` enum string:
 - `"available"`: Ready to use according to the specified options.
 - `"downloadable"`: Not currently available, but resources (e.g., language packs for on-device) can be downloaded.
 - `"downloading"`: Resources are currently being downloaded.
