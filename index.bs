@@ -1294,14 +1294,14 @@ These events do not bubble and are not cancelable.
 <h2 class="no-num" id="acknowledgments">Acknowledgments</h2>
 
 <p style="white-space: pre-line">
-  Adam Sobiesieski (Phoster)
-  Bj\C3\B6rn Bringert (Google)
+  Adam Sobieski (Phoster)
+  Björn Bringert (Google)
   Charles Pritchard
   Dominic Mazzoni (Google)
   Gerardo Capiel (Benetech)
   Jerry Carter
   Kagami Sascha Rosylight
-  Marcos C\C3\A1ceres (Mozilla)
+  Marcos Cáceres (Mozilla)
   Nagesh Kharidi (Openstream)
   Olli Pettay (Mozilla)
   Peter Beverloo (Google)
