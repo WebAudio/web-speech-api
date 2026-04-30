@@ -248,7 +248,7 @@ interface SpeechRecognitionAlternative {
 [SecureContext, Exposed=Window]
 interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
-    getter SpeechRecognitionAlternative item(unsigned long index);
+    getter SpeechRecognitionAlternative? item(unsigned long index);
     readonly attribute boolean isFinal;
 };
 
@@ -256,7 +256,7 @@ interface SpeechRecognitionResult {
 [SecureContext, Exposed=Window]
 interface SpeechRecognitionResultList {
     readonly attribute unsigned long length;
-    getter SpeechRecognitionResult item(unsigned long index);
+    getter SpeechRecognitionResult? item(unsigned long index);
 };
 
 // A full response, which could be interim or final, part of a continuous response or not
