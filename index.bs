@@ -202,9 +202,16 @@ interface SpeechRecognition : EventTarget {
     attribute EventHandler onend;
 };
 
+enum SpeechRecognitionQuality {
+  "command",
+  "dictation",
+  "conversation"
+};
+
 dictionary SpeechRecognitionOptions {
   required sequence<DOMString> langs;
   boolean processLocally = false;
+  SpeechRecognitionQuality quality = "command";
 };
 
 enum SpeechRecognitionErrorCode {
@@ -389,7 +396,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
   <dt><dfn method for=SpeechRecognition>available({{SpeechRecognitionOptions}} options)</dfn> method</dt>
   <dd>
-    The {{SpeechRecognition/available}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the recognition availability matching the {{SpeechRecognitionOptions}} argument.
+    The {{SpeechRecognition/available}} method returns a {{Promise}} that resolves to a {{AvailabilityStatus}} indicating the recognition availability matching the {{SpeechRecognitionOptions}} argument, including the requested {{SpeechRecognitionOptions/quality}} level.
     Access to this method is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which has a [=policy-controlled feature/default allowlist=] of <code>[=default allowlist/'self'=]</code>.
 
     When invoked, run these steps:
@@ -400,7 +407,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
   <dt><dfn method for=SpeechRecognition>install({{SpeechRecognitionOptions}} options)</dfn> method</dt>
   <dd>
-    The {{SpeechRecognition/install}} method attempts to install speech recognition language packs for all languages specified in `options.langs`.
+    The {{SpeechRecognition/install}} method attempts to install speech recognition language packs for all languages specified in `options.langs` matching the requested {{SpeechRecognitionOptions/quality}} level floor.
     It returns a {{Promise}} that resolves to a {{boolean}}.
     The promise resolves to `true` when all installation attempts for requested and supported languages succeed (or the languages were already installed).
     The promise resolves to `false` if `options.langs` is empty, if not all of the requested languages are supported, or if any installation attempt for a supported language fails.
@@ -411,7 +418,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
     1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
     1. Let <var>promise</var> be <a>a new promise</a>.
-    1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language for <var>lang</var>.
+    1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor.
         <p class=note>
           Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
         </p>
@@ -446,6 +453,19 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   <dd>Indicates that speech recognition is available for all specified language(s) and the given processing preference.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is true, this means on-device recognition is installed and ready.
   If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is false, it means recognition (which could be local or remote) is available.</dd>
+</dl>
+
+<h4 id="speech-recognition-quality-values">SpeechRecognitionQuality Enum Values</h4>
+<p>The {{SpeechRecognitionQuality}} enum indicates the semantic capability and quality level floor requested for the speech recognition model. Its values are:</p>
+<dl>
+  <dt><dfn enum-value for="SpeechRecognitionQuality">"command"</dfn></dt>
+  <dd>Level 1: Short phrases, single speaker, limited vocabulary (e.g., voice commands for smart home or simple apps).</dd>
+
+  <dt><dfn enum-value for="SpeechRecognitionQuality">"dictation"</dfn></dt>
+  <dd>Level 2: Continuous speech, moderate background noise, single primary speaker (e.g., long-form text input like SMS/Email).</dd>
+
+  <dt><dfn enum-value for="SpeechRecognitionQuality">"conversation"</dfn></dt>
+  <dd>Level 3: Multi-speaker, complex vocabulary, high noise tolerance (e.g., meeting transcripts and continuous captioning).</dd>
 </dl>
 
 <p>When the  <dfn>availability algorithm</dfn> with <var>options</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
