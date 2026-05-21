@@ -52,3 +52,6 @@ recognition.onresult = (event) => {
 
 recognition.start();
 ```
+
+### Note on Automatic Capitalization
+In many modern speech-to-text engines, automatic punctuation is tightly coupled with automatic capitalization. When `unspokenPunctuation` is set to `true`, developers should expect that the underlying recognition engine may also automatically capitalize the first word following an inferred sentence-ending punctuation mark (e.g., a period or question mark). Because this behavior depends on the specific platform and OS implementation, developers should not assume the resulting text will remain strictly lowercase when this flag is enabled.
