@@ -176,6 +176,7 @@ interface SpeechRecognition : EventTarget {
     attribute DOMString lang;
     attribute boolean continuous;
     attribute boolean interimResults;
+    attribute boolean unspokenPunctuation;
     attribute unsigned long maxAlternatives;
     attribute boolean processLocally;
     attribute ObservableArray<SpeechRecognitionPhrase> phrases;
@@ -331,6 +332,10 @@ interface SpeechRecognitionPhrase {
   When set to true, interim results should be returned.
   When set to false, interim results must not be returned.
   The default value must be false. Note, this attribute setting does not affect final results.</dd>
+
+  <dt><dfn attribute for=SpeechRecognition>unspokenPunctuation</dfn> attribute</dt>
+  <dd>This attribute controls whether the speech recognition engine automatically infers and inserts punctuation marks (such as periods, commas, and question marks) based on natural pauses, grammatical structure, and prosody, without requiring the user to explicitly speak the punctuation commands.
+  The default value must be false.</dd>
 
   <dt><dfn attribute for=SpeechRecognition>maxAlternatives</dfn> attribute</dt>
   <dd>This attribute will set the maximum number of {{SpeechRecognitionAlternative}}s per result.
