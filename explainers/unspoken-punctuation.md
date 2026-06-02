@@ -53,7 +53,18 @@ recognition.onresult = (event) => {
 recognition.start();
 ```
 
-### Note on Automatic Capitalization
+## Alternatives Considered
+
+### Enabling Automatic Punctuation by Default
+Instead of introducing the new `unspokenPunctuation` configuration option, we considered simply enabling automatic punctuation by default for all `SpeechRecognition` sessions. 
+
+* **Why it was rejected:** The primary blocker for this approach is backward compatibility. Existing developers and applications relying on the Web Speech API expect the traditional behavior of raw, unpunctuated text. Changing the default output would likely break downstream text processing, custom formatting logic, or applications that explicitly require verbatim, unpunctuated dictation.
+
+By introducing this as an opt-in boolean attribute, we maintain stability for existing applications while providing the flexibility modern developers need. This approach also follows strong industry precedent; major speech recognition providers, such as [Azure Speech Service](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/display-text-format?pivots=programming-language-python) and [Google Cloud Speech-to-Text](https://docs.cloud.google.com/speech-to-text/docs/automatic-punctuation), similarly implement automatic punctuation as a configurable option rather than a forced default.
+
+## Implementation Notes
+
+### Automatic Capitalization
 In many modern speech-to-text engines, automatic punctuation is tightly coupled with automatic capitalization. When `unspokenPunctuation` is set to `true`, developers should expect that the underlying recognition engine may also automatically capitalize the first word following an inferred sentence-ending punctuation mark (e.g., a period or question mark). Because this behavior depends on the specific platform and OS implementation, developers should not assume the resulting text will remain strictly lowercase when this flag is enabled.
 
 ### Internationalization
