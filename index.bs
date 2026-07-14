@@ -120,6 +120,8 @@ This does not preclude adding support for this as a future API enhancement, and 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
 
   <li>To mitigate the risk of fingerprinting, user agents MUST NOT personalize speech recognition when performing speech recognition on a {{MediaStreamTrack}}.</li>
+
+  <li>To mitigate fingerprinting vectors associated with high-precision timing, user agents MUST apply timestamp fuzzing and precision reduction to {{SpeechRecognitionResult/audioStartTime}} and {{SpeechRecognitionResult/audioEndTime}} before exposing these attributes to scripts (e.g. by rounding to 2ms precision).</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -258,6 +260,8 @@ interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
     getter SpeechRecognitionAlternative? item(unsigned long index);
     readonly attribute boolean isFinal;
+    readonly attribute DOMHighResTimeStamp? audioStartTime;
+    readonly attribute DOMHighResTimeStamp? audioEndTime;
 };
 
 // A collection of responses (used in continuous mode)
@@ -354,6 +358,16 @@ interface SpeechRecognitionPhrase {
   <dd>
     The getter steps are to return the value of {{SpeechRecognition/[[phrases]]}}.
   </dd>
+</dl>
+
+<h4 id="speechrecoresult-attributes">SpeechRecognitionResult Attributes</h4>
+
+<dl>
+  <dt><dfn attribute for=SpeechRecognitionResult>audioStartTime</dfn> attribute</dt>
+  <dd>A nullable {{DOMHighResTimeStamp}} representing the start of the audio segment corresponding to this recognition result, in milliseconds relative to the time origin. Returns null if the underlying recognition engine does not support audio segment start timestamps.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>audioEndTime</dfn> attribute</dt>
+  <dd>A nullable {{DOMHighResTimeStamp}} representing the end of the audio segment corresponding to this recognition result, in milliseconds relative to the time origin. Returns null if the underlying recognition engine does not support audio segment end timestamps.</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
