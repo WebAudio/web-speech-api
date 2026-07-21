@@ -406,7 +406,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
     When invoked, run these steps:
     1. Let <var>promise</var> be <a>a new promise</a>.
-    1. Run the <a>availability algorithm</a> with <var>options</var> and <var>promise</var>. If it returns an exception, throw it and abort these steps.
+    1. Run the <a>availability algorithm</a> with <var>options</var> and <var>promise</var>.
     1. Return <var>promise</var>.
   </dd>
 
@@ -419,10 +419,10 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     Access to this method is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which has a [=policy-controlled feature/default allowlist=] of <code>[=default allowlist/'self'=]</code>.
 
     When invoked, run these steps:
-    1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
-    1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
-    1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, return a resolved {{Promise}} with false and skip the rest of these steps.
     1. Let <var>promise</var> be <a>a new promise</a>.
+    1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], reject <var>promise</var> with an {{InvalidStateError}}, abort these steps, returning <var>promise</var>.
+    1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}}, abort these steps, returning <var>promise</var>.
+    1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, resolve <var>promise</var> with false, abort these steps, returning <var>promise</var>.
     1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor.
         <p class=note>
           Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
@@ -474,9 +474,9 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 </dl>
 
 <p>When the  <dfn>availability algorithm</dfn> with <var>options</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
-1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], throw an {{InvalidStateError}} and abort these steps.
+1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], reject <var>promise</var> with an {{InvalidStateError}} and abort these steps.
 1. Let <var>langs</var> be {{SpeechRecognitionOptions/langs}} of <var>options</var>.
-1. If any <var>lang</var> in <var>langs</var> is not a valid [[!BCP47]] language tag, throw a {{SyntaxError}} and abort these steps.
+1. If any <var>lang</var> in <var>langs</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}} and abort these steps.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `false`:
     1. If <var>langs</var> is an empty sequence, let <var>status</var> be {{AvailabilityStatus/unavailable}}.
     1. Else if speech recognition (which may be remote) is available for all <var>language</var> in <var>langs</var>, let <var>status</var> be {{AvailabilityStatus/available}}.
