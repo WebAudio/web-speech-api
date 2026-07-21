@@ -5,10 +5,10 @@
   <title>Web Speech API</title>
   <meta content="CG-DRAFT" name="w3c-status">
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version 0a3d88311, updated Mon May 4 18:07:03 2026 +0000" name="generator">
+  <meta content="Bikeshed version d113b2e81, updated Tue Jun 9 14:57:55 2026 -0700" name="generator">
   <link href="https://webaudio.github.io/web-speech-api/" rel="canonical">
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
-  <meta content="41e368aa9be3ac3f3fa885206a31fbdab2f3b52a" name="revision">
+  <meta content="8307ee199cbcaa8a26f6d86663b9d803d1cc8d0f" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -731,7 +731,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 </p>
    <h1 class="no-ref p-name" id="title">Web Speech API</h1>
    <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>,
-    <time class="dt-updated" datetime="2026-05-21">21 May 2026</time></p>
+    <time class="dt-updated" datetime="2026-07-21">21 July 2026</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -1177,7 +1177,7 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
       <li data-md>
        <p>Let <var>promise</var> be <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#a-new-promise" id="ref-for-a-new-promise">a new promise</a>.</p>
       <li data-md>
-       <p>Run the <a data-link-type="dfn" href="#availability-algorithm" id="ref-for-availability-algorithm">availability algorithm</a> with <var>options</var> and <var>promise</var>. If it returns an exception, throw it and abort these steps.</p>
+       <p>Run the <a data-link-type="dfn" href="#availability-algorithm" id="ref-for-availability-algorithm">availability algorithm</a> with <var>options</var> and <var>promise</var>.</p>
       <li data-md>
        <p>Return <var>promise</var>.</p>
      </ol>
@@ -1194,13 +1194,13 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
      <p>When invoked, run these steps:</p>
      <ol>
       <li data-md>
-       <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active">fully active</a>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror②">InvalidStateError</a></code> and abort these steps.</p>
-      <li data-md>
-       <p>If any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs">langs</a></code> of <var>options</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, throw a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror">SyntaxError</a></code> and abort these steps.</p>
-      <li data-md>
-       <p>If the on-device speech recognition language pack for any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs①">langs</a></code> of <var>options</var> is unsupported, return a resolved <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-promise" id="ref-for-idl-promise④">Promise</a></code> with false and skip the rest of these steps.</p>
-      <li data-md>
        <p>Let <var>promise</var> be <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#a-new-promise" id="ref-for-a-new-promise①">a new promise</a>.</p>
+      <li data-md>
+       <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active">fully active</a>, reject <var>promise</var> with an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror②">InvalidStateError</a></code>, abort these steps, returning <var>promise</var>.</p>
+      <li data-md>
+       <p>If any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs">langs</a></code> of <var>options</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, reject <var>promise</var> with a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror">SyntaxError</a></code>, abort these steps, returning <var>promise</var>.</p>
+      <li data-md>
+       <p>If the on-device speech recognition language pack for any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs①">langs</a></code> of <var>options</var> is unsupported, resolve <var>promise</var> with false, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
        <p>For each <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs②">langs</a></code> of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-quality" id="ref-for-dom-speechrecognitionoptions-quality②">quality</a></code> level floor.</p>
        <p class="note" role="note">
@@ -1252,11 +1252,11 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
 </p>
    <ol>
     <li data-md>
-     <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object①">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global②">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window①">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active①">fully active</a>, throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror③">InvalidStateError</a></code> and abort these steps.</p>
+     <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object①">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global②">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window①">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active①">fully active</a>, reject <var>promise</var> with an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror③">InvalidStateError</a></code> and abort these steps.</p>
     <li data-md>
      <p>Let <var>langs</var> be <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs④">langs</a></code> of <var>options</var>.</p>
     <li data-md>
-     <p>If any <var>lang</var> in <var>langs</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, throw a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror①">SyntaxError</a></code> and abort these steps.</p>
+     <p>If any <var>lang</var> in <var>langs</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, reject <var>promise</var> with a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror①">SyntaxError</a></code> and abort these steps.</p>
     <li data-md>
      <p>If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-processlocally" id="ref-for-dom-speechrecognitionoptions-processlocally⑦">processLocally</a></code> of <var>options</var> is <code>false</code>:</p>
      <ol>
@@ -2409,7 +2409,7 @@ These events do not bubble and are not cancelable.</p>
   <h3 class="heading no-num no-ref settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-bcp47">[BCP47]
-   <dd>A. Phillips, Ed.; M. Davis, Ed.. <a href="https://www.rfc-editor.org/rfc/rfc5646"><cite>Tags for Identifying Languages</cite></a>. September 2009. Best Current Practice. URL: <a href="https://www.rfc-editor.org/rfc/rfc5646">https://www.rfc-editor.org/rfc/rfc5646</a>
+   <dd>A. Phillips, Ed.; M. Davis, Ed.. <a href="https://www.rfc-editor.org/info/rfc5646/"><cite>Tags for Identifying Languages</cite></a>. September 2009. Best Current Practice. URL: <a href="https://www.rfc-editor.org/info/rfc5646/">https://www.rfc-editor.org/info/rfc5646/</a>
    <dt id="biblio-dom">[DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
@@ -2897,7 +2897,7 @@ let dfnPanelData = {
 "b75bb3bd": {"dfnID":"b75bb3bd","dfnText":"SecureContext","external":true,"refSections":[{"refs":[{"id":"ref-for-SecureContext"},{"id":"ref-for-SecureContext\u2460"},{"id":"ref-for-SecureContext\u2461"},{"id":"ref-for-SecureContext\u2462"},{"id":"ref-for-SecureContext\u2463"},{"id":"ref-for-SecureContext\u2464"},{"id":"ref-for-SecureContext\u2465"}],"title":"4.1. The SpeechRecognition Interface"}],"url":"https://webidl.spec.whatwg.org/#SecureContext"},
 "bc1e4fa1": {"dfnID":"bc1e4fa1","dfnText":"MediaStreamTrack","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-mediastreamtrack"}],"title":"3. Security and privacy considerations"},{"refs":[{"id":"ref-for-dom-mediastreamtrack\u2460"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-dom-mediastreamtrack\u2461"},{"id":"ref-for-dom-mediastreamtrack\u2462"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack"},
 "bcc085e3": {"dfnID":"bcc085e3","dfnText":"request permission to use","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-request-permission-to-use"}],"title":"4.1.4. SpeechRecognitionQuality Enum Values"}],"url":"https://w3c.github.io/permissions/#dfn-request-permission-to-use"},
-"bdbd19d1": {"dfnID":"bdbd19d1","dfnText":"Promise","external":true,"refSections":[{"refs":[{"id":"ref-for-idl-promise"},{"id":"ref-for-idl-promise\u2460"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-idl-promise\u2461"},{"id":"ref-for-idl-promise\u2462"},{"id":"ref-for-idl-promise\u2463"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://webidl.spec.whatwg.org/#idl-promise"},
+"bdbd19d1": {"dfnID":"bdbd19d1","dfnText":"Promise","external":true,"refSections":[{"refs":[{"id":"ref-for-idl-promise"},{"id":"ref-for-idl-promise\u2460"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-idl-promise\u2461"},{"id":"ref-for-idl-promise\u2462"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://webidl.spec.whatwg.org/#idl-promise"},
 "be2d2b4c": {"dfnID":"be2d2b4c","dfnText":"SyntaxError","external":true,"refSections":[{"refs":[{"id":"ref-for-syntaxerror"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-syntaxerror\u2460"}],"title":"4.1.4. SpeechRecognitionQuality Enum Values"},{"refs":[{"id":"ref-for-syntaxerror\u2461"}],"title":"4.1.11. SpeechRecognitionPhrase"}],"url":"https://webidl.spec.whatwg.org/#syntaxerror"},
 "cc890cc1": {"dfnID":"cc890cc1","dfnText":"policy-controlled feature","external":true,"refSections":[{"refs":[{"id":"ref-for-policy-controlled-feature"},{"id":"ref-for-policy-controlled-feature\u2460"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/webappsec-permissions-policy/#policy-controlled-feature"},
 "d36324c1": {"dfnID":"d36324c1","dfnText":"readyState","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-mediastreamtrack-readystate"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack-readystate"},
