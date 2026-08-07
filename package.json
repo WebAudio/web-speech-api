@@ -15,6 +15,6 @@
   },
   "homepage": "https://github.com/WebAudio/web-speech-api#readme",
   "devDependencies": {
-    "vnu-jar": "^24.10.17"
+    "vnu-jar": "^26.7.3"
   }
 }
