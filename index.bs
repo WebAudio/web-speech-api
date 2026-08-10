@@ -422,13 +422,16 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. Let <var>promise</var> be <a>a new promise</a>.
     1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], reject <var>promise</var> with an {{InvalidStateError}}, abort these steps, returning <var>promise</var>.
     1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}}, abort these steps, returning <var>promise</var>.
-    1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, resolve <var>promise</var> with false, abort these steps, returning <var>promise</var>.
-    1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor.
-        <p class=note>
-          Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
-        </p>
-    1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
-        - When the download of all languages specified by {{SpeechRecognitionOptions/langs}} of <var>options</var> succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.
+    1. If {{SpeechRecognitionOptions/langs}} of <var>options</var> is an empty sequence, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.
+    1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.
+    1. [=In parallel=], run the following steps:
+        1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor.
+            <p class=note>
+              Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
+            </p>
+        1. Wait for the download of all languages specified by {{SpeechRecognitionOptions/langs}} of <var>options</var> to either succeed or fail.
+        1. If the download of all those languages succeeded, let <var>result</var> be <code>true</code>, otherwise let <var>result</var> be <code>false</code>.
+        1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to resolve <var>promise</var> with <var>result</var>.
             <p class="note">
               Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
             </p>
