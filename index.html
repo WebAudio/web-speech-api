@@ -8,7 +8,7 @@
   <meta content="Bikeshed version d113b2e81, updated Tue Jun 9 14:57:55 2026 -0700" name="generator">
   <link href="https://webaudio.github.io/web-speech-api/" rel="canonical">
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
-  <meta content="8307ee199cbcaa8a26f6d86663b9d803d1cc8d0f" name="revision">
+  <meta content="7cc1f35207732e28c493fae0b145fece047ee7b5" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -731,7 +731,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 </p>
    <h1 class="no-ref p-name" id="title">Web Speech API</h1>
    <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>,
-    <time class="dt-updated" datetime="2026-07-21">21 July 2026</time></p>
+    <time class="dt-updated" datetime="2026-08-10">10 August 2026</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -1200,21 +1200,27 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
       <li data-md>
        <p>If any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs">langs</a></code> of <var>options</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, reject <var>promise</var> with a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror">SyntaxError</a></code>, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
-       <p>If the on-device speech recognition language pack for any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs①">langs</a></code> of <var>options</var> is unsupported, resolve <var>promise</var> with false, abort these steps, returning <var>promise</var>.</p>
+       <p>If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs①">langs</a></code> of <var>options</var> is an empty sequence, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
-       <p>For each <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs②">langs</a></code> of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-quality" id="ref-for-dom-speechrecognitionoptions-quality②">quality</a></code> level floor.</p>
-       <p class="note" role="note">
+       <p>If the on-device speech recognition language pack for any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs②">langs</a></code> of <var>options</var> is unsupported, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.</p>
+      <li data-md>
+       <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#in-parallel" id="ref-for-in-parallel">In parallel</a>, run the following steps:</p>
+       <ol>
+        <li data-md>
+         <p>For each <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs③">langs</a></code> of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-quality" id="ref-for-dom-speechrecognitionoptions-quality②">quality</a></code> level floor.</p>
+         <p class="note" role="note">
   Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
 </p>
-      <li data-md>
-       <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">Queue a task</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global①">relevant global object</a>’s <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration-task-queue" id="ref-for-dfn-service-worker-registration-task-queue">task queue</a> to run the following step:</p>
-       <ul>
         <li data-md>
-         <p>When the download of all languages specified by <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs③">langs</a></code> of <var>options</var> succeeds, resolve <var>promise</var> with <code>true</code>, otherwise resolve it with <code>false</code>.</p>
+         <p>Wait for the download of all languages specified by <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs④">langs</a></code> of <var>options</var> to either succeed or fail.</p>
+        <li data-md>
+         <p>If the download of all those languages succeeded, let <var>result</var> be <code>true</code>, otherwise let <var>result</var> be <code>false</code>.</p>
+        <li data-md>
+         <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task" id="ref-for-queue-a-task">Queue a task</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global①">relevant global object</a>’s <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-registration-task-queue" id="ref-for-dfn-service-worker-registration-task-queue">task queue</a> to resolve <var>promise</var> with <var>result</var>.</p>
          <p class="note" role="note">
   Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
 </p>
-       </ul>
+       </ol>
       <li data-md>
        <p>Return <var>promise</var>.</p>
        <p class="note" role="note">
@@ -1254,7 +1260,7 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
     <li data-md>
      <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object①">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global②">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window①">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active①">fully active</a>, reject <var>promise</var> with an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror③">InvalidStateError</a></code> and abort these steps.</p>
     <li data-md>
-     <p>Let <var>langs</var> be <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs④">langs</a></code> of <var>options</var>.</p>
+     <p>Let <var>langs</var> be <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs⑤">langs</a></code> of <var>options</var>.</p>
     <li data-md>
      <p>If any <var>lang</var> in <var>langs</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, reject <var>promise</var> with a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror①">SyntaxError</a></code> and abort these steps.</p>
     <li data-md>
@@ -2357,6 +2363,7 @@ These events do not bubble and are not cancelable.</p>
      <li><span class="dfn-paneled" id="3349d69f">associated Document</span>
      <li><span class="dfn-paneled" id="12b8dfc0">current settings object</span>
      <li><span class="dfn-paneled" id="0e3ba9f8">fully active</span>
+     <li><span class="dfn-paneled" id="a72449dd">in parallel</span>
      <li><span class="dfn-paneled" id="9a517a7d">queue a task</span>
      <li><span class="dfn-paneled" id="e99bd18e">relevant global object</span>
     </ul>
@@ -2893,6 +2900,7 @@ let dfnPanelData = {
 "9a517a7d": {"dfnID":"9a517a7d","dfnText":"queue a task","external":true,"refSections":[{"refs":[{"id":"ref-for-queue-a-task"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-queue-a-task\u2460"},{"id":"ref-for-queue-a-task\u2461"},{"id":"ref-for-queue-a-task\u2462"},{"id":"ref-for-queue-a-task\u2463"}],"title":"4.1.4. SpeechRecognitionQuality Enum Values"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task"},
 "9cce47fd": {"dfnID":"9cce47fd","dfnText":"sequence","external":true,"refSections":[{"refs":[{"id":"ref-for-idl-sequence"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-idl-sequence\u2460"}],"title":"4.2. The SpeechSynthesis Interface"}],"url":"https://webidl.spec.whatwg.org/#idl-sequence"},
 "a5c91173": {"dfnID":"a5c91173","dfnText":"SameObject","external":true,"refSections":[{"refs":[{"id":"ref-for-SameObject"}],"title":"4.2. The SpeechSynthesis Interface"}],"url":"https://webidl.spec.whatwg.org/#SameObject"},
+"a72449dd": {"dfnID":"a72449dd","dfnText":"in parallel","external":true,"refSections":[{"refs":[{"id":"ref-for-in-parallel"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://html.spec.whatwg.org/multipage/infrastructure.html#in-parallel"},
 "availability-algorithm": {"dfnID":"availability-algorithm","dfnText":"availability algorithm","external":false,"refSections":[{"refs":[{"id":"ref-for-availability-algorithm"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"#availability-algorithm"},
 "b75bb3bd": {"dfnID":"b75bb3bd","dfnText":"SecureContext","external":true,"refSections":[{"refs":[{"id":"ref-for-SecureContext"},{"id":"ref-for-SecureContext\u2460"},{"id":"ref-for-SecureContext\u2461"},{"id":"ref-for-SecureContext\u2462"},{"id":"ref-for-SecureContext\u2463"},{"id":"ref-for-SecureContext\u2464"},{"id":"ref-for-SecureContext\u2465"}],"title":"4.1. The SpeechRecognition Interface"}],"url":"https://webidl.spec.whatwg.org/#SecureContext"},
 "bc1e4fa1": {"dfnID":"bc1e4fa1","dfnText":"MediaStreamTrack","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-mediastreamtrack"}],"title":"3. Security and privacy considerations"},{"refs":[{"id":"ref-for-dom-mediastreamtrack\u2460"}],"title":"4.1. The SpeechRecognition Interface"},{"refs":[{"id":"ref-for-dom-mediastreamtrack\u2461"},{"id":"ref-for-dom-mediastreamtrack\u2462"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"https://w3c.github.io/mediacapture-main/#dom-mediastreamtrack"},
@@ -2979,7 +2987,7 @@ let dfnPanelData = {
 "dom-speechrecognitionevent-speechrecognitionevent-type-eventinitdict-type": {"dfnID":"dom-speechrecognitionevent-speechrecognitionevent-type-eventinitdict-type","dfnText":"type","external":false,"refSections":[],"url":"#dom-speechrecognitionevent-speechrecognitionevent-type-eventinitdict-type"},
 "dom-speechrecognitioneventinit-resultindex": {"dfnID":"dom-speechrecognitioneventinit-resultindex","dfnText":"resultIndex","external":false,"refSections":[],"url":"#dom-speechrecognitioneventinit-resultindex"},
 "dom-speechrecognitioneventinit-results": {"dfnID":"dom-speechrecognitioneventinit-results","dfnText":"results","external":false,"refSections":[],"url":"#dom-speechrecognitioneventinit-results"},
-"dom-speechrecognitionoptions-langs": {"dfnID":"dom-speechrecognitionoptions-langs","dfnText":"langs","external":false,"refSections":[{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-langs"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2460"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2461"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2462"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-langs\u2463"}],"title":"4.1.4. SpeechRecognitionQuality Enum Values"}],"url":"#dom-speechrecognitionoptions-langs"},
+"dom-speechrecognitionoptions-langs": {"dfnID":"dom-speechrecognitionoptions-langs","dfnText":"langs","external":false,"refSections":[{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-langs"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2460"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2461"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2462"},{"id":"ref-for-dom-speechrecognitionoptions-langs\u2463"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-langs\u2464"}],"title":"4.1.4. SpeechRecognitionQuality Enum Values"}],"url":"#dom-speechrecognitionoptions-langs"},
 "dom-speechrecognitionoptions-processlocally": {"dfnID":"dom-speechrecognitionoptions-processlocally","dfnText":"processLocally","external":false,"refSections":[{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-processlocally"}],"title":"4.1.2. SpeechRecognition Methods"},{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2460"},{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2461"},{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2462"},{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2463"},{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2464"},{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2465"}],"title":"4.1.3. AvailabilityStatus Enum Values"},{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2466"},{"id":"ref-for-dom-speechrecognitionoptions-processlocally\u2467"}],"title":"4.1.4. SpeechRecognitionQuality Enum Values"}],"url":"#dom-speechrecognitionoptions-processlocally"},
 "dom-speechrecognitionoptions-quality": {"dfnID":"dom-speechrecognitionoptions-quality","dfnText":"quality","external":false,"refSections":[{"refs":[{"id":"ref-for-dom-speechrecognitionoptions-quality"},{"id":"ref-for-dom-speechrecognitionoptions-quality\u2460"},{"id":"ref-for-dom-speechrecognitionoptions-quality\u2461"}],"title":"4.1.2. SpeechRecognition Methods"}],"url":"#dom-speechrecognitionoptions-quality"},
 "dom-speechrecognitionphrase-boost": {"dfnID":"dom-speechrecognitionphrase-boost","dfnText":"boost","external":false,"refSections":[{"refs":[{"id":"ref-for-dom-speechrecognitionphrase-boost"}],"title":"4.1. The SpeechRecognition Interface"}],"url":"#dom-speechrecognitionphrase-boost"},
@@ -3628,6 +3636,7 @@ let refsData = {
 "https://dom.spec.whatwg.org/#event": {"displayText":"Event","export":true,"for_":[],"level":"1","normative":true,"shortname":"dom","spec":"dom","status":"current","text":"Event","type":"interface","url":"https://dom.spec.whatwg.org/#event"},
 "https://dom.spec.whatwg.org/#eventtarget": {"displayText":"EventTarget","export":true,"for_":[],"level":"1","normative":true,"shortname":"dom","spec":"dom","status":"current","text":"EventTarget","type":"interface","url":"https://dom.spec.whatwg.org/#eventtarget"},
 "https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active": {"displayText":"fully active","export":true,"for_":["Document"],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"fully active","type":"dfn","url":"https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active"},
+"https://html.spec.whatwg.org/multipage/infrastructure.html#in-parallel": {"displayText":"in parallel","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"in parallel","type":"dfn","url":"https://html.spec.whatwg.org/multipage/infrastructure.html#in-parallel"},
 "https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window": {"displayText":"associated Document","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"associated document","type":"dfn","url":"https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window"},
 "https://html.spec.whatwg.org/multipage/nav-history-apis.html#window": {"displayText":"Window","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"Window","type":"interface","url":"https://html.spec.whatwg.org/multipage/nav-history-apis.html#window"},
 "https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global": {"displayText":"relevant global object","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"relevant global object","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"},
