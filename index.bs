@@ -364,10 +364,10 @@ interface SpeechRecognitionPhrase {
 
 <dl>
   <dt><dfn attribute for=SpeechRecognitionResult>audioStartTime</dfn> attribute</dt>
-  <dd>A nullable {{DOMHighResTimeStamp}} representing the start of the audio segment corresponding to this recognition result, in milliseconds relative to the time origin. Returns null if the underlying recognition engine does not support audio segment start timestamps.</dd>
+  <dd>A nullable {{DOMHighResTimeStamp}} representing the start of the audio segment corresponding to this recognition result, in milliseconds relative to the start of the audio stream. Returns null if the underlying recognition engine does not support audio segment start timestamps.</dd>
 
   <dt><dfn attribute for=SpeechRecognitionResult>audioEndTime</dfn> attribute</dt>
-  <dd>A nullable {{DOMHighResTimeStamp}} representing the end of the audio segment corresponding to this recognition result, in milliseconds relative to the time origin. Returns null if the underlying recognition engine does not support audio segment end timestamps.</dd>
+  <dd>A nullable {{DOMHighResTimeStamp}} representing the end of the audio segment corresponding to this recognition result, in milliseconds relative to the start of the audio stream. Returns null if the underlying recognition engine does not support audio segment end timestamps.</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
