@@ -17,10 +17,10 @@ We propose extending the `SpeechRecognitionResult` interface to include optional
 
 ```webidl
 partial interface SpeechRecognitionResult {
-    // Start timestamp of the audio segment in milliseconds (relative to time origin)
+    // Start timestamp of the audio segment in milliseconds (relative to the start of the audio stream)
     readonly attribute DOMHighResTimeStamp? audioStartTime;
 
-    // End timestamp of the audio segment in milliseconds (relative to time origin)
+    // End timestamp of the audio segment in milliseconds (relative to the start of the audio stream)
     readonly attribute DOMHighResTimeStamp? audioEndTime;
 };
 ```
@@ -39,7 +39,7 @@ recognition.interimResults = true;
 recognition.onresult = (event) => {
   const result = event.results[event.resultIndex];
 
-  if (result.audioEndTime !== null) {
+  if (result.audioEndTime !== null && result.audioEndTime !== undefined) {
     // Calculate on-device processing latency
     const processingLatencyMs = event.timeStamp - result.audioEndTime;
 
@@ -54,6 +54,62 @@ recognition.onresult = (event) => {
 recognition.start();
 ```
 
+## Converting Stream Timestamps to Document Time Origin
+
+`audioStartTime` and `audioEndTime` are defined as media-local offsets in milliseconds relative to the start of the audio stream ($t = 0.0\text{ms}$).
+
+For real-time applications such as **live translation**, **subtitling overlays**, and **audio-visual sync**, developers often need to map these stream offsets to the document's global timeline (`DOMHighResTimeStamp` / `performance.now()`).
+
+### Pattern: Capturing the Audio Timeline Origin
+
+To convert stream-relative timestamps to document time coordinates:
+1. Record the baseline timestamp when the `audiostart` event fires (`event.timeStamp` is a `DOMHighResTimeStamp` relative to `timeOrigin`).
+2. Add the result's `audioStartTime` and `audioEndTime` offsets to that baseline.
+
+$$\text{absoluteStartTime} = \text{audioOrigin} + \text{result.audioStartTime}$$
+$$\text{absoluteEndTime} = \text{audioOrigin} + \text{result.audioEndTime}$$
+
+### Measuring Live Translation Latency Example
+
+In live speech translation workflows, measuring both **Speech-to-Text (STT) latency** and **Machine Translation (MT) end-to-end latency** is essential:
+
+```javascript
+const recognition = new SpeechRecognition();
+recognition.continuous = true;
+recognition.interimResults = true;
+
+let audioOriginTime = 0;
+
+// 1. Capture the audio stream's time origin on the document timeline
+recognition.onaudiostart = (event) => {
+  audioOriginTime = event.timeStamp;
+};
+
+recognition.onresult = async (event) => {
+  const result = event.results[event.resultIndex];
+  if (result.audioEndTime === null || result.audioEndTime === undefined) return;
+
+  // 2. Convert stream offsets to document time origin coordinates
+  const absoluteAudioStart = audioOriginTime + result.audioStartTime;
+  const absoluteAudioEnd = audioOriginTime + result.audioEndTime;
+
+  // 3. Compute ASR recognition latency
+  const asrLatencyMs = event.timeStamp - absoluteAudioEnd;
+
+  // 4. Perform live translation
+  const text = result[0].transcript;
+  const translationStartTime = performance.now();
+  const translatedText = await translateService.translate(text, 'es');
+  const translationEndTime = performance.now();
+
+  // 5. Total end-to-end latency from speaker utterance to translated subtitle
+  const totalE2ELatencyMs = translationEndTime - absoluteAudioEnd;
+
+  console.log(`ASR Processing Time: ${asrLatencyMs.toFixed(1)}ms`);
+  console.log(`Total Live Translation Delay: ${totalE2ELatencyMs.toFixed(1)}ms`);
+};
+```
+---
 ### Security and Privacy Considerations
 
 #### Fingerprinting Risk
