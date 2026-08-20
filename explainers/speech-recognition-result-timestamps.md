@@ -123,3 +123,15 @@ To mitigate fingerprinting vectors, browser implementations MUST apply timestamp
 - **Browser-Generated Warning Events (`onprocessinglag`):** Simple for web applications to catch, but fails to accommodate varying latency thresholds across different use cases (e.g. real-time meeting captioning requires <200ms latency, while dictation tools tolerate multi-second delays).
 - **Internal Processing Queue Metric (`queueDepth`):** Directly exposes engine backlogs, but is difficult to standardize across fragmented engine architectures, model types, and buffering strategies.
 - **Binary Status Flag (`isRealTime`):** Simple boolean check, but lacks numerical precision for applications seeking to track progressive latency degradation trendlines.
+- **Existing API Surfaces (Events):** Existing events were deemed insufficient because:
+  1. **`speechstart` and `speechend` Events:**
+     The Web Speech API specification defines `speechstart` and `speechend` events on the `SpeechRecognition` interface. However, these events cannot solve the continuous latency tracking problem:
+     * **Session-level vs. Result-level Granularity:** In continuous recognition mode, `speechstart` and `soundstart` fire once when voice activity is first detected at the beginning of the session. They do not fire for every individual phrase or sentence returned in subsequent `SpeechRecognitionResult` events.
+     * **Inequality with Result Audio Boundaries:** Because `speechstart` only marks initial voice activity, `speechstart.timeStamp` is not equal to `result.audioStartTime` for any subsequent utterance emitted throughout a session.
+     * **Fragile Event Correlation:** Even if engines fired `speechstart`/`speechend` around each phrase, associating separate asynchronous DOM events with streaming interim and final `SpeechRecognitionResult` objects requires complex, error-prone client-side state tracking (poor ergonomics).
+  2. **Overloading `event.timeStamp` on Result Events:**
+     Another alternative considered was modifying `event.timeStamp` on the `result` event to match the speech timing:
+     * **Eliminates Latency Calculation:** `event.timeStamp` indicates when the browser dispatched the DOM event on the document timeline. Keeping `event.timeStamp` intact while providing `result.audioEndTime` allows web applications to measure speech recognition and translation processing delay:
+       $$\text{latencyMs} = \text{event.timeStamp} - \text{result.audioEndTime}$$
+     * Overwriting `event.timeStamp` would conflate acoustic timing with main-thread dispatch time, eliminating the ability to detect processing lag.
+Attaching `audioStartTime` and `audioEndTime` directly to `SpeechRecognitionResult` provides a 1:1 association between the recognized transcript text and its corresponding acoustic timeline.
