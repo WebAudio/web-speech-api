@@ -150,7 +150,7 @@ For on-device speech recognition, the exact download status of language packs ca
 
 To prevent cross-origin fingerprinting and site collusion, user agents <strong>must</strong> partition language pack availability by [=storage key=]. User agents <strong>must</strong> mask the current download status by returning {{"downloadable"}} from {{SpeechRecognition/available()}} by default, even if the actual underlying language pack is {{"available"}} or {{"downloading"}} on the user's device.
 
-This masking state is established for each (API, options, [=storage key=]) tuple. The user agent <strong>must only</strong> set the state to "unmasked" for a specific [=storage key=] after a web page within that key explicitly calls {{SpeechRecognition/install()}} with a given set of options, and successfully starts a download or the promise resolves to <code>true</code> (indicating the language pack is ready). 
+This masking state is established for each (API, options, [=storage key=]) tuple. The user agent <strong>must only</strong> set the state to "unmasked" for a specific [=storage key=] after a web page within that key explicitly calls {{SpeechRecognition/install()}} with a given set of options, and successfully starts a download or the promise resolves to `true` (indicating the language pack is ready). 
 
 Since {{SpeechRecognition/install()}} has stronger requirements (see <a href="#on-device-model-privacy-availability-installation">Installation-time friction</a>), this ensures that web pages only get access to the true download status after taking a more costly action, such as triggering a user permission prompt.
 
@@ -162,7 +162,7 @@ The mitigation described in <a href="#on-device-model-privacy-availability-maski
 
 *   The {{SpeechRecognition/install()}} method both requires and consumes [=user activation=], when it would initiate a download.
 *   The {{SpeechRecognition/install()}} method allows the user agent to prompt the user for permission, or to implicitly reject download attempts based on previous signals (such as an observed pattern of abuse).
-*   Access to {{SpeechRecognition/install()}} and {{SpeechRecognition/available()}} is gated on an per-API [=policy-controlled feature=], which means that only top-level origins and their delegates can use the API.
+*   Access to {{SpeechRecognition/install()}} and {{SpeechRecognition/available()}} is gated on a per-API [=policy-controlled feature=], which means that only top-level origins and their delegates can use the API.
 
 Additionally, initiating the download process via {{SpeechRecognition/install()}} is more or less a one-time operation for a given language. The availability status will only transition from {{"downloadable"}} to {{"downloading"}} to {{"available"}} via these guarded installation operations. That is, while {{SpeechRecognition/install()}} can be used to read some of these fingerprinting bits (by observing the resolution of its promise and subsequent calls to {{SpeechRecognition/available()}}), doing so will effectively "destroy" those bits by changing the state.
 
@@ -183,16 +183,6 @@ Another ingredient in ensuring that websites cannot toggle the availability stat
 To avoid this, <strong>user agents should not implement systems which allow web pages to control the eviction of downloaded language packs</strong>, including via indirect triggers such as further subsequent downloads. One way to fulfill this requirement is to never evict downloaded material in response to web page-initiated storage pressure, instead refusing to download new material (e.g., {{SpeechRecognition/install()}} resolving to `false`) if doing so would cause storage pressure.
 
 Evicting downloads in response to user-controlled actions (e.g., via a browser settings UI) is not problematic.
-
-<h5 id="on-device-model-privacy-availability-alternatives">Alternate Options</h5>
-
-While some of the above requirements are specified using "must" language, most are "should." This is because implementations might use different strategies to preserve user privacy, especially for APIs with smaller models or language packs.
-
-The simplest is to treat language pack downloads like other stored resources, partitioning them by the downloading page's [=storage key=]. This leverages existing web origin model privacy protections. The downside is potentially redundant downloads across sites, using more user bandwidth and disk space.
-
-A variant is to re-download for new [=storage keys=] but re-use on-disk storage if the pack is already there, saving disk space but still using time/bandwidth.
-
-User agents could also attempt to fake a download for new [=storage keys=] if the language pack is already present, by waiting a similar amount of time as the real download originally took. This saves bandwidth and disk space but is less private due to network side channels (e.g., a page observing no change in network throughput). Such a scheme needs caution, as the first site initiating the download could try to inflate this time. Nevertheless, faking download times might be useful, combined with other mitigations.
 
 <h4 id="on-device-model-privacy-sensitive-language">Sensitive Language Information</h4>
 
