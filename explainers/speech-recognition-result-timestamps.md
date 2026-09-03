@@ -6,7 +6,7 @@
 
 The Web Speech API currently does not expose the start and end timestamps of the source audio corresponding to a given transcription result (`SpeechRecognitionResult`). This limitation creates a major challenge for API clients requiring timeline association use cases:
   - **Subtitling & Closed Captions:** Web applications cannot automatically generate synchronized subtitle tracks (e.g. WebVTT / SRT cues) because they lack the exact `[startTime, endTime]` boundaries for each phrase.
-  - **Interactive Meeting Transcripts ("Click-to-Seek"):** In recorded meetings, video lectures, and podcast players, applications cannot offer "click-to-seek" navigation—where clicking on a sentence or word in the transcript jumps media playback to that exact moment.
+  - **Interactive Meeting Transcripts ("Click-to-Seek"):** In recorded meetings, video lectures, and podcast players, applications cannot offer "click-to-seek" navigation—where clicking on a sentence or phrase in the transcript jumps media playback to that exact moment.
   - **Live WebRTC Video Sync & Lip-Sync:** In real-time video conferencing (e.g. Google Meet), web applications cannot reliably synchronize live captions or translated subtitles with incoming video frames. Because DOM events conflate speech timing with processing and main-thread queuing delays, subtitles either lag behind speaker lip movement or disappear prematurely.
   - **Text-Based Media Editing:** Web-based podcast and video editors cannot allow users to cut, splice, or re-time media segments by editing transcript text without knowing the corresponding audio boundaries.
 
