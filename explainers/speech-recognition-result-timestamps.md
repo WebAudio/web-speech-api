@@ -66,6 +66,13 @@ recognition.interimResults = false;
 const audioStream = mediaElement.captureStream();
 recognition.start(audioStream.getAudioTracks()[0]);
 
+let audioOriginMs = 0;
+
+// 1. Capture the audio stream's start timestamp on the document timeline
+recognition.onaudiostart = (event) => {
+  audioOriginMs = event.timeStamp;
+};
+
 recognition.onresult = (event) => {
   for (let i = event.resultIndex; i < event.results.length; ++i) {
     const result = event.results[i];
