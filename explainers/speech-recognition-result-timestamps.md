@@ -4,60 +4,67 @@
 
 ### Problem
 
-The Web Speech API currently does not expose the start and end timestamps of the source audio corresponding to a given transcription result (`SpeechRecognitionResult`). This limitation creates two major challenges for API clients and end users:
+The Web Speech API currently does not expose the start and end timestamps of the source audio corresponding to a given transcription result (`SpeechRecognitionResult`). This limitation creates a major challenge for API clients requiring timeline association use cases:
+  - **Subtitling & Closed Captions:** Web applications cannot automatically generate synchronized subtitle tracks (e.g. WebVTT / SRT cues) because they lack the exact `[startTime, endTime]` boundaries for each phrase.
+  - **Interactive Meeting Transcripts ("Click-to-Seek"):** In recorded meetings, video lectures, and podcast players, applications cannot offer "click-to-seek" navigation—where clicking on a sentence or phrase in the transcript jumps media playback to that exact moment.
+  - **Live WebRTC Video Sync & Lip-Sync:** In real-time video conferencing (e.g. Google Meet), web applications cannot reliably synchronize live captions or translated subtitles with incoming video frames. Because DOM events conflate speech timing with processing and main-thread queuing delays, subtitles either lag behind speaker lip movement or disappear prematurely.
+  - **Text-Based Media Editing:** Web-based podcast and video editors cannot allow users to cut, splice, or re-time media segments by editing transcript text without knowing the corresponding audio boundaries.
 
-- **Timeline Association:** Developers cannot readily associate transcribed text with specific segments of the audio source, making it difficult to map generated captions to media timelines, audio tracks, or video frames.
-- **Latency Tracking & Backend Failover:** With the adoption of on-device Automatic Speech Recognition (ASR) to improve privacy and reduce server costs, processing performance becomes heavily dependent on local client hardware resources. The Web Speech API acts as a "black box" regarding local processing delays. Developers cannot programmatically calculate transcription latency or detect when on-device models fall behind real-time. This leads to poor user experiences (e.g. caption lag during live video conferencing) and deprives applications of the signal needed to seamlessly fail over to high-performance cloud backends.
+---
 
 ### Proposed Solution
 
-We propose extending the `SpeechRecognitionResult` interface to include `audioStartTime` and `audioEndTime` attributes.
+We propose extending the `SpeechRecognitionResult` interface with `speechStartTime` and `speechEndTime` attributes.
 
 #### Web IDL Definition
 
 ```webidl
 partial interface SpeechRecognitionResult {
-    // Start timestamp of the audio segment in seconds relative to the start of the audio stream (0.0s).
-    readonly attribute double audioStartTime;
+    // Start timestamp of the speech segment in seconds relative to the start of the audio stream (0.0s).
+    readonly attribute double speechStartTime;
 
-    // End timestamp of the audio segment in seconds relative to the start of the audio stream.
-    readonly attribute double audioEndTime;
+    // End timestamp of the speech segment in seconds relative to the start of the audio stream.
+    readonly attribute double speechEndTime;
 };
 ```
 
-### Choice of Time Representation: Seconds as `double`
+### Choice of Naming & Representation
 
-The timestamps `audioStartTime` and `audioEndTime` are defined as `double` representing **seconds**, rather than `DOMHighResTimeStamp` (milliseconds). This design choice is based on the following considerations:
+1. **Mirroring `speechstart` and `speechend`:**
+   * The names `speechStartTime` and `speechEndTime` mirror the existing `speechstart` and `speechend` events in the Web Speech API, clearly communicating that these timestamps bound the acoustic speech segment corresponding to the transcript hypothesis.
 
-1. **Consistency with Adjacent Web Audio & Media APIs:**
-   * In adjacent W3C media specifications, media-local stream timelines are universally represented in **seconds** as a `double`:
+2. **Seconds as `double` (Consistency with Adjacent Media APIs):**
+   * In adjacent W3C media specifications, media-local timelines are universally represented in **seconds** as a `double`:
      * **Web Audio API:** [`BaseAudioContext.currentTime`](https://webaudio.github.io/web-audio-api/#dom-baseaudiocontext-currenttime) (seconds)
      * **HTML Media Elements:** [`HTMLMediaElement.currentTime`](https://html.spec.whatwg.org/multipage/media.html#dom-media-currenttime) (seconds)
      * **AudioParam Scheduling:** [`AudioParam.setValueAtTime()`](https://webaudio.github.io/web-audio-api/#dom-audioparam-setvalueattime) (seconds)
-   * Using seconds ensures seamless interoperability when developers route audio between `<audio>`/`<video>` elements, Web Audio graphs, and `SpeechRecognition`, avoiding repetitive and error-prone unit conversions ($1000\times / \div 1000$).
+   * Using seconds ensures seamless interoperability when routing audio between media elements, Web Audio graphs, and `SpeechRecognition`, avoiding repetitive unit conversions ($1000\times / \div 1000$).
 
-2. **Semantic Inaccuracy of `DOMHighResTimeStamp` for Media Streams:**
-   * Under the [W3C High Resolution Time Level 3](https://www.w3.org/TR/hr-time-3/#sec-domhighrestimestamp) specification, `DOMHighResTimeStamp` is strictly defined as a time coordinate in **milliseconds** measured relative to the global execution context's time origin (`performance.timeOrigin`).
-   * Because `audioStartTime` and `audioEndTime` represent a **media-local timeline** (elapsed time starting at $0.0\text{s}$ at the beginning of the audio stream) rather than document uptime, using `DOMHighResTimeStamp` would be semantically incorrect.
-
-3. **Numerical Precision:**
-   * A standard 64-bit IEEE 754 floating-point number (`double`) in seconds provides sub-nanosecond resolution across hours of continuous audio streaming, ensuring sample-accurate precision at any audio sample rate (e.g. 16 kHz to 96 kHz).
-
-4. **W3C TAG Design Principles Alignment:**
-   * This design adheres to the [W3C TAG Design Principles on Times and Dates](https://w3ctag.github.io/design-principles/#times-and-dates), ensuring consistency across media stream APIs on the web platform.
+3. **Semantic Inaccuracy of `DOMHighResTimeStamp`:**
+   * Under [W3C High Resolution Time Level 3](https://www.w3.org/TR/hr-time-3/#sec-domhighrestimestamp), `DOMHighResTimeStamp` represents milliseconds relative to document uptime (`performance.timeOrigin`). Because `speechStartTime` and `speechEndTime` represent media-local stream offsets ($t = 0.0\text{s}$ at stream start), using `DOMHighResTimeStamp` would be semantically inaccurate.
 
 ---
 
-### Proposed Behavior & Example Usage
+### Proposed Behavior & Examples
 
-The `audioStartTime` and `audioEndTime` properties represent the audio duration bounds (in seconds) corresponding to the transcribed segment.
+The `speechStartTime` and `speechEndTime` properties represent the exact acoustic bounds (in seconds) of the recognized speech, measured from the start of the audio stream consumed by the recognizer ($t = 0.0\text{s}$, marked by `audiostart`).
 
-Developers can programmatically compute processing latency by converting the stream timestamp to the document timeline and comparing against `Event.timeStamp`:
+#### Example 1: Automated Subtitling & "Click-to-Seek" Navigation
+
+In this example, speech recognition results from an audio/video element are converted into WebVTT subtitle cues and interactive "click-to-seek" transcript links:
 
 ```javascript
+const mediaElement = document.querySelector('video');
+const track = mediaElement.addTextTrack('captions', 'English', 'en');
+track.mode = 'showing';
+
 const recognition = new SpeechRecognition();
 recognition.continuous = true;
-recognition.interimResults = true;
+recognition.interimResults = false;
+
+// Transcribe audio track from HTMLMediaElement
+const audioStream = mediaElement.captureStream();
+recognition.start(audioStream.getAudioTracks()[0]);
 
 let audioOriginMs = 0;
 
@@ -67,81 +74,81 @@ recognition.onaudiostart = (event) => {
 };
 
 recognition.onresult = (event) => {
-  const result = event.results[event.resultIndex];
+  for (let i = event.resultIndex; i < event.results.length; ++i) {
+    const result = event.results[i];
+    if (!result.isFinal) continue;
 
-  // 2. Convert stream-relative seconds to document timeline milliseconds
-  const absoluteAudioEndMs = audioOriginMs + (result.audioEndTime * 1000);
+    const transcriptText = result[0].transcript;
 
-  // 3. Calculate on-device processing latency
-  const processingLatencyMs = event.timeStamp - absoluteAudioEndMs;
+    // 1. Create a synchronized WebVTT caption cue
+    const cue = new VTTCue(result.speechStartTime, result.speechEndTime, transcriptText);
+    track.addCue(cue);
 
-  // 4. Trigger seamless failover to cloud backend if latency breaches acceptable threshold
-  if (processingLatencyMs > 1500) {
-    console.warn(`ASR processing lag detected (${processingLatencyMs.toFixed(0)}ms). Transitioning to cloud provider.`);
-    switchToCloudBackend();
+    // 2. Build interactive transcript element ("Click-to-Seek")
+    const transcriptItem = document.createElement('p');
+    transcriptItem.textContent = `[${result.speechStartTime.toFixed(1)}s] ${transcriptText}`;
+    transcriptItem.onclick = () => {
+      mediaElement.currentTime = result.speechStartTime;
+      mediaElement.play();
+    };
+    document.getElementById('transcript-container').appendChild(transcriptItem);
   }
 };
-
-recognition.start();
 ```
 
 ---
 
-### Converting Stream Timestamps to Document Time Origin
+#### Example 2: Live Video Conferencing (Live Display + Recording Timeline Association)
 
-`audioStartTime` and `audioEndTime` are defined as media-local offsets in seconds relative to the start of the audio stream ($t = 0.0\text{s}$).
+In zero-delay live conferencing (such as Google Meet), captions are displayed immediately upon arrival during the live call to minimize perceived lag. Simultaneously, `speechStartTime` and `speechEndTime` are preserved in the meeting transcript so that the exported recording video track can be rendered with frame-accurate subtitle alignment:
 
-For real-time applications such as **live translation**, **subtitling overlays**, and **audio-visual sync**, developers often need to map these stream offsets to the document's global timeline (`performance.timeOrigin` / `performance.now()`).
-
-#### Pattern: Capturing the Audio Timeline Origin
-
-To convert stream-relative timestamps to document time coordinates:
-1. Record the baseline timestamp when the `audiostart` event fires (`event.timeStamp` is in milliseconds relative to `timeOrigin`).
-2. Add the result's `audioStartTime` and `audioEndTime` offsets (converted to milliseconds) to that baseline:
-
-$$\text{absoluteStartTimeMs} = \text{audioOriginMs} + (\text{result.audioStartTime} \times 1000)$$
-$$\text{absoluteEndTimeMs} = \text{audioOriginMs} + (\text{result.audioEndTime} \times 1000)$$
-
-#### Measuring Live Translation Latency Example
-
-In live speech translation workflows, measuring both **Speech-to-Text (STT) latency** and **Machine Translation (MT) end-to-end latency** is essential:
+*(See the [interactive live meeting and recording demo](https://alan33d.github.io/web-speech-demos/live_meeting_recording_demo.html) for a working implementation of this pattern).*
 
 ```javascript
 const recognition = new SpeechRecognition();
 recognition.continuous = true;
 recognition.interimResults = true;
 
-let audioOriginTimeMs = 0;
+// 1. Live Call: Display captions immediately as results arrive
+let hideTimeout = null;
+const liveSubtitleOverlay = document.getElementById('live-captions');
 
-// 1. Capture the audio stream's time origin on the document timeline
-recognition.onaudiostart = (event) => {
-  audioOriginTimeMs = event.timeStamp;
-};
+// 2. Meeting Transcript: Archive finalized results with exact audio boundaries
+const meetingTranscript = [];
 
-recognition.onresult = async (event) => {
+recognition.onresult = (event) => {
   const result = event.results[event.resultIndex];
+  const transcriptText = result[0].transcript;
 
-  // 2. Convert stream offsets (seconds) to document timeline (milliseconds)
-  const absoluteAudioStartMs = audioOriginTimeMs + (result.audioStartTime * 1000);
-  const absoluteAudioEndMs = audioOriginTimeMs + (result.audioEndTime * 1000);
+  // Render live captions immediately on screen
+  liveSubtitleOverlay.textContent = transcriptText;
+  liveSubtitleOverlay.classList.toggle('interim', !result.isFinal);
 
-  // 3. Compute ASR recognition latency
-  const asrLatencyMs = event.timeStamp - absoluteAudioEndMs;
+  // Keep final captions on screen for a 3-second reading persistence window
+  clearTimeout(hideTimeout);
+  if (result.isFinal) {
+    hideTimeout = setTimeout(() => {
+      liveSubtitleOverlay.textContent = '';
+    }, 3000);
 
-  // 4. Perform live translation
-  const text = result[0].transcript;
-  const translationStartTime = performance.now();
-  const translatedText = await translateService.translate(text, 'es');
-  const translationEndTime = performance.now();
-
-  // 5. Total end-to-end latency from speaker utterance to translated subtitle
-  const totalE2ELatencyMs = translationEndTime - absoluteAudioEndMs;
-
-  console.log(`ASR Processing Time: ${asrLatencyMs.toFixed(1)}ms`);
-  console.log(`Total Live Translation Delay: ${totalE2ELatencyMs.toFixed(1)}ms`);
+    // Archive the finalized sentence with exact acoustic timestamps
+    meetingTranscript.push({
+      text: transcriptText,
+      startTime: result.speechStartTime,
+      endTime: result.speechEndTime
+    });
+  }
 };
 
-recognition.start();
+// 3. Post-Meeting Replay: Synchronize caption cues with the recorded meeting video
+function initializeRecordingCaptions(recordedVideoElement) {
+  const captionTrack = recordedVideoElement.addTextTrack('captions', 'Meeting Captions');
+  captionTrack.mode = 'showing';
+
+  for (const entry of meetingTranscript) {
+    captionTrack.addCue(new VTTCue(entry.startTime, entry.endTime, entry.text));
+  }
+}
 ```
 
 ---
@@ -160,19 +167,16 @@ To mitigate potential side-channel and fingerprinting vectors:
 
 ### Alternatives Considered
 
-- **Browser-Generated Warning Events (`onprocessinglag`):** Simple for web applications to catch, but fails to accommodate varying latency thresholds across different use cases (e.g. real-time meeting captioning requires <200ms latency, while dictation tools tolerate multi-second delays).
-- **Internal Processing Queue Metric (`queueDepth`):** Directly exposes engine backlogs, but is difficult to standardize across fragmented engine architectures, model types, and buffering strategies.
-- **Binary Status Flag (`isRealTime`):** Simple boolean check, but lacks numerical precision for applications seeking to track progressive latency degradation trendlines.
-- **Existing API Surfaces (Events):** Existing events were deemed insufficient because:
-  1. **`speechstart` and `speechend` Events:**
-     The Web Speech API specification defines `speechstart` and `speechend` events on the `SpeechRecognition` interface. However, these events cannot solve the continuous latency tracking problem:
-     * **Session-level vs. Result-level Granularity:** In continuous recognition mode, `speechstart` and `soundstart` fire once when voice activity is first detected at the beginning of the session. They do not fire for every individual phrase or sentence returned in subsequent `SpeechRecognitionResult` events.
-     * **Inequality with Result Audio Boundaries:** Because `speechstart` only marks initial voice activity, `speechstart.timeStamp` is not equal to `result.audioStartTime` for any subsequent utterance emitted throughout a session.
-     * **Fragile Event Correlation:** Even if engines fired `speechstart`/`speechend` around each phrase, associating separate asynchronous DOM events with streaming interim and final `SpeechRecognitionResult` objects requires complex, error-prone client-side state tracking (poor ergonomics).
-  2. **Overloading `event.timeStamp` on Result Events:**
-     Another alternative considered was modifying `event.timeStamp` on the `result` event to match the speech timing:
-     * **Eliminates Latency Calculation:** `event.timeStamp` indicates when the browser dispatched the DOM event on the document timeline. Keeping `event.timeStamp` intact while providing `result.audioEndTime` allows web applications to measure processing delay:
-       $$\text{latencyMs} = \text{event.timeStamp} - (\text{audioOriginMs} + \text{result.audioEndTime} \times 1000)$$
-     * Overwriting `event.timeStamp` would conflate acoustic timing with main-thread dispatch time, eliminating the ability to detect processing lag.
+- **Splitting `result` into `resultstart` and `resultend` Events:**
+  Splitting the single `result` event into separate `resultstart` and `resultend` DOM events (each carrying individual `event.timeStamp` values) was considered. However, localizing timestamps directly within `SpeechRecognitionResult` and `SpeechRecognitionResultList` is architecturally superior:
+  1. **Fragile Client State Management:** Requiring developers to correlate separate, asynchronous start and end events across streaming interim updates introduces a complex, race-prone state machine into web applications.
+  2. **Decoupling from Cumulative Results (`SpeechRecognitionResultList`):** In continuous recognition mode (`continuous = true`), the API maintains a cumulative list of all results generated during the session. If timing information is only emitted on transient events, historical results stored in `event.results` would have no localized timestamps. Developers would be forced to manually maintain a secondary timeline mapping in application code.
+  3. **Unnecessary Event Overhead for Limited Utility:** Adding yet another pair of events that client applications must process adds event-loop overhead and API surface complexity with limited practical use cases compared to self-contained result properties.
+  4. **Self-Contained Data Model:** Attaching `speechStartTime` and `speechEndTime` directly to `SpeechRecognitionResult` ensures that each transcript hypothesis is self-contained and atomically bound to its exact temporal audio segment, allowing results to be passed, cached, and manipulated independently of DOM event lifecycles.
 
-Attaching `audioStartTime` and `audioEndTime` directly to `SpeechRecognitionResult` provides a 1:1 association between the recognized transcript text and its corresponding acoustic timeline.
+- **Using Existing VAD (`speechstart` / `speechend`) and `result` Event Timestamps:**
+  Relying on existing Voice Activity Detection (VAD) events (`speechstart` / `speechend`) and `result` event timestamps was considered. While `speechend.timeStamp` (or the proposed start and end timestamps on `SpeechRecognitionResult`) could potentially be used for basic processing latency tracking, existing events are fundamentally insufficient for timeline association:
+  1. **Cannot Capture Start Times in Continuous Recognition:** Neither VAD events nor `result` events capture the acoustic start timestamp of interim or final results that occur in the middle of a continuous recognition session. In continuous recognition mode (`continuous = true`), `speechstart` fires only once at the beginning of the entire session, leaving all subsequent phrases without an acoustic start boundary.
+  2. **No Start Timestamp on `speechend` or `result` Events:** `speechend` only marks when speech activity ended, and `result.timeStamp` only indicates when the DOM event was dispatched. Neither provides the acoustic start time needed to compute utterance duration or construct `[startTime, endTime]` subtitle cues.
+  3. **No Support for Interim Results:** While a speaker is actively talking mid-sentence, `speechend` cannot fire, leaving streaming captions without timing information.
+  4. **Endpointer Trailing Silence Skew:** Voice Activity Detection (VAD) endpointers only fire `speechend` after observing 500ms–1500ms of trailing silence. This introduces non-speech padding into the timestamp, degrading audio alignment.
