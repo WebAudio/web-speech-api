@@ -120,6 +120,8 @@ This does not preclude adding support for this as a future API enhancement, and 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
 
   <li>To mitigate the risk of fingerprinting, user agents MUST NOT personalize speech recognition when performing speech recognition on a {{MediaStreamTrack}}.</li>
+
+  <li>To mitigate micro-architectural timing attacks and hardware fingerprinting, user agents MAY reduce the resolution of {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} or introduce jitter, in accordance with the user agent's security and privacy policies (similar to [[HR-TIME-3]] and [[HTML]]).</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -258,6 +260,8 @@ interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
     getter SpeechRecognitionAlternative? item(unsigned long index);
     readonly attribute boolean isFinal;
+    readonly attribute double speechStartTime;
+    readonly attribute double speechEndTime;
 };
 
 // A collection of responses (used in continuous mode)
@@ -666,6 +670,12 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
   <dt><dfn attribute for=SpeechRecognitionResult>isFinal</dfn> attribute</dt>
   <dd>The final boolean must be set to true if this is the final time the speech service will return this particular index value.
   If the value is false, then this represents an interim result that could still be changed.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the start time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer (where 0.0 seconds corresponds to the <a event for=SpeechRecognition>audiostart</a> event).</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the end time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer.</dd>
 </dl>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
