@@ -121,7 +121,7 @@ This does not preclude adding support for this as a future API enhancement, and 
 
   <li>To mitigate the risk of fingerprinting, user agents MUST NOT personalize speech recognition when performing speech recognition on a {{MediaStreamTrack}}.</li>
 
-  <li>To mitigate micro-architectural timing attacks and hardware fingerprinting, user agents may reduce the resolution of {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} or introduce jitter, in accordance with the user agent's security and privacy policies (similar to [[HR-TIME-3]] and [[HTML]]).</li>
+  <li>To mitigate micro-architectural timing attacks and hardware fingerprinting, user agents MAY reduce the resolution of {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} or introduce jitter, in accordance with the user agent's security and privacy policies (similar to [[HR-TIME-3]] and [[HTML]]).</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -358,16 +358,6 @@ interface SpeechRecognitionPhrase {
   <dd>
     The getter steps are to return the value of {{SpeechRecognition/[[phrases]]}}.
   </dd>
-</dl>
-
-<h4 id="speechrecoresult-attributes">SpeechRecognitionResult Attributes</h4>
-
-<dl>
-  <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
-  <dd>A {{double}} representing the start time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer (where 0.0 seconds corresponds to the {{SpeechRecognition/onaudiostart}} event).</dd>
-
-  <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
-  <dd>A {{double}} representing the end time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer.</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
@@ -680,6 +670,12 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
   <dt><dfn attribute for=SpeechRecognitionResult>isFinal</dfn> attribute</dt>
   <dd>The final boolean must be set to true if this is the final time the speech service will return this particular index value.
   If the value is false, then this represents an interim result that could still be changed.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the start time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer (where 0.0 seconds corresponds to the <a event for=SpeechRecognition>audiostart</a> event).</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the end time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer.</dd>
 </dl>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
