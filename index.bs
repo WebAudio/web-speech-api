@@ -120,8 +120,6 @@ This does not preclude adding support for this as a future API enhancement, and 
   <li>The user agent may also give the user a longer explanation the first time speech input is used, to let the user know what it is and how they can tune their privacy settings to disable speech recording if required.</li>
 
   <li>To mitigate the risk of fingerprinting, user agents MUST NOT personalize speech recognition when performing speech recognition on a {{MediaStreamTrack}}.</li>
-
-  <li>To mitigate micro-architectural timing attacks and hardware fingerprinting, user agents MAY reduce the resolution of {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} or introduce jitter, in accordance with the user agent's security and privacy policies (similar to [[HR-TIME-3]] and [[HTML]]).</li>
 </ol>
 
 <h3 id="implementation-considerations">Implementation considerations</h3>
@@ -672,11 +670,18 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
   If the value is false, then this represents an interim result that could still be changed.</dd>
 
   <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
-  <dd>A {{double}} representing the start time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer (where 0.0 seconds corresponds to the <a event for=SpeechRecognition>audiostart</a> event).</dd>
+  <dd>A {{double}} representing the start of the speech segment corresponding to this recognition result, as an offset in seconds on the recognition session's audio timeline.
+  The origin of that timeline (0.0 seconds) is the position of the source audio at the moment the session began consuming it.</dd>
 
   <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
-  <dd>A {{double}} representing the end time of the speech segment corresponding to this recognition result, in seconds relative to the start of the audio stream consumed by the speech recognizer.</dd>
+  <dd>A {{double}} representing the end of the speech segment corresponding to this recognition result, as an offset in seconds on the same timeline as {{SpeechRecognitionResult/speechStartTime}}.</dd>
 </dl>
+
+<p class=note>
+  {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} are offsets on the recognition session's audio timeline, not readings of a system clock.
+  They are therefore unaffected by audio output latency or by drift between an audio device clock and the system clock, and are identical whether recognition runs in real time or faster than real time.
+  Their precision is implementation-defined and is in practice bounded by the frame size of the underlying recognizer.
+</p>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
 
