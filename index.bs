@@ -258,6 +258,8 @@ interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
     getter SpeechRecognitionAlternative? item(unsigned long index);
     readonly attribute boolean isFinal;
+    readonly attribute double speechStartTime;
+    readonly attribute double speechEndTime;
 };
 
 // A collection of responses (used in continuous mode)
@@ -666,7 +668,20 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
   <dt><dfn attribute for=SpeechRecognitionResult>isFinal</dfn> attribute</dt>
   <dd>The final boolean must be set to true if this is the final time the speech service will return this particular index value.
   If the value is false, then this represents an interim result that could still be changed.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the start of the speech segment corresponding to this recognition result, as an offset in seconds on the recognition session's audio timeline.
+  The origin of that timeline (0.0 seconds) is the position of the source audio at the moment the session began consuming it.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the end of the speech segment corresponding to this recognition result, as an offset in seconds on the same timeline as {{SpeechRecognitionResult/speechStartTime}}.</dd>
 </dl>
+
+<p class=note>
+  {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} are offsets on the recognition session's audio timeline, not readings of a system clock.
+  They are therefore unaffected by audio output latency or by drift between an audio device clock and the system clock, and are identical whether recognition runs in real time or faster than real time.
+  Their precision is implementation-defined and is in practice bounded by the frame size of the underlying recognizer.
+</p>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
 
