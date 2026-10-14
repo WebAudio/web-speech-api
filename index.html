@@ -5,10 +5,10 @@
   <title>Web Speech API</title>
   <meta content="CG-DRAFT" name="w3c-status">
   <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
-  <meta content="Bikeshed version ac92c2f0d, updated Fri Aug 21 16:01:29 2026 -0700" name="generator">
+  <meta content="Bikeshed version 49e9fdd4f, updated Tue Oct 13 14:27:53 2026 -0700" name="generator">
   <link href="https://webaudio.github.io/web-speech-api/" rel="canonical">
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
-  <meta content="ada61c656ef669d2989b3fcb8a3340fcbbbe2cea" name="revision">
+  <meta content="2b4b687462f7280aada070dd85ea9932aafa4f7b" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>/* Boilerplate: style-autolinks */
@@ -731,7 +731,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 </p>
    <h1 class="no-ref p-name" id="title">Web Speech API</h1>
    <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">Draft Community Group Report</a>,
-    <time class="dt-updated" datetime="2026-09-18">18 September 2026</time></p>
+    <time class="dt-updated" datetime="2026-10-14">14 October 2026</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -1198,9 +1198,9 @@ throw an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.wha
       <li data-md>
        <p>If the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object" id="ref-for-current-settings-object">current settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" id="ref-for-concept-relevant-global">relevant global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window">associated Document</a> is NOT <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#fully-active" id="ref-for-fully-active">fully active</a>, reject <var>promise</var> with an <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror②">InvalidStateError</a></code>, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
-       <p>If any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs">langs</a></code> of <var>options</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, reject <var>promise</var> with a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror">SyntaxError</a></code>, abort these steps, returning <var>promise</var>.</p>
+       <p>If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs">langs</a></code> of <var>options</var> is an empty sequence, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
-       <p>If <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs①">langs</a></code> of <var>options</var> is an empty sequence, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.</p>
+       <p>If any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs①">langs</a></code> of <var>options</var> is not a valid <a data-link-type="biblio" href="#biblio-bcp47" title="Tags for Identifying Languages">[BCP47]</a> language tag, reject <var>promise</var> with a <code class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#syntaxerror" id="ref-for-syntaxerror">SyntaxError</a></code>, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
        <p>If the on-device speech recognition language pack for any <var>lang</var> in <code class="idl"><a data-link-type="idl" href="#dom-speechrecognitionoptions-langs" id="ref-for-dom-speechrecognitionoptions-langs②">langs</a></code> of <var>options</var> is unsupported, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.</p>
       <li data-md>
@@ -2417,7 +2417,7 @@ These events do not bubble and are not cancelable.</p>
   <h3 class="heading no-num no-ref settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-bcp47">[BCP47]
-   <dd>A. Phillips, Ed.; M. Davis, Ed.. <a href="https://www.rfc-editor.org/info/rfc5646/"><cite>Tags for Identifying Languages</cite></a>. September 2009. Best Current Practice. URL: <a href="https://www.rfc-editor.org/info/rfc5646/">https://www.rfc-editor.org/info/rfc5646/</a>
+   <dd>Addison Phillips; Mark Davis. <a href="https://www.rfc-editor.org/info/bcp47"><cite>Tags for Identifying Languages</cite></a>. September 2009. Best Current Practice. URL: <a href="https://www.rfc-editor.org/info/bcp47">https://www.rfc-editor.org/info/bcp47</a>
    <dt id="biblio-dom">[DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
@@ -2429,7 +2429,7 @@ These events do not bubble and are not cancelable.</p>
    <dt id="biblio-permissions">[PERMISSIONS]
    <dd>Marcos Caceres; Mike Taylor. <a href="https://w3c.github.io/permissions/"><cite>Permissions</cite></a>. URL: <a href="https://w3c.github.io/permissions/">https://w3c.github.io/permissions/</a>
    <dt id="biblio-permissions-policy-1">[PERMISSIONS-POLICY-1]
-   <dd>Ian Clelland. <a href="https://w3c.github.io/webappsec-permissions-policy/"><cite>Permissions Policy</cite></a>. URL: <a href="https://w3c.github.io/webappsec-permissions-policy/">https://w3c.github.io/webappsec-permissions-policy/</a>
+   <dd>Ian Clelland; Ari Chivukula. <a href="https://w3c.github.io/webappsec-permissions-policy/"><cite>Permissions Policy</cite></a>. URL: <a href="https://w3c.github.io/webappsec-permissions-policy/">https://w3c.github.io/webappsec-permissions-policy/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-service-workers">[SERVICE-WORKERS]
