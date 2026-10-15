@@ -258,6 +258,8 @@ interface SpeechRecognitionResult {
     readonly attribute unsigned long length;
     getter SpeechRecognitionAlternative? item(unsigned long index);
     readonly attribute boolean isFinal;
+    readonly attribute double speechStartTime;
+    readonly attribute double speechEndTime;
 };
 
 // A collection of responses (used in continuous mode)
@@ -382,7 +384,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. If |audioTrack|'s {{MediaStreamTrack/readyState}} attribute is NOT
         `"live"`, throw an {{InvalidStateError}} and abort these steps.
     1. Let |requestMicrophonePermission| be `false`.
-    1. Run the [=start session algorithm=] with |requestMicrophonePermission|.
+    1. Run the [=start session algorithm=] with |requestMicrophonePermission| and |audioTrack|.
   </dd>
 
   <dt><dfn method for=SpeechRecognition>stop()</dfn> method</dt>
@@ -508,7 +510,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     - Resolve <var>promise</var> with <var>status</var>.
 
 When the <dfn>start session algorithm</dfn> with
-|requestMicrophonePermission| is invoked, the user agent MUST run the
+|requestMicrophonePermission| and |audioTrack| (if provided) is invoked, the user agent MUST run the
 following steps:
 
 1. If the [=current settings object=]'s [=relevant global object=]'s
@@ -529,6 +531,8 @@ following steps:
     permission to use=] "`microphone`" is [=permission/"denied"=]:
     1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
     1. Abort these steps.
+1. Begin consuming audio from the audio source (the {{MediaStreamTrack}} if one was provided, or the microphone otherwise), buffering frames if the recognition service is not yet ready.
+    This establishes the recognition session's <dfn>session audio timeline</dfn>, which measures elapsed audio duration in seconds starting at `0.0` at the first audio frame consumed and advancing with the duration of each subsequent audio frame consumed.
 1. Once the system is successfully listening to the recognition, queue a task to
     [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
@@ -666,7 +670,19 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
   <dt><dfn attribute for=SpeechRecognitionResult>isFinal</dfn> attribute</dt>
   <dd>The final boolean must be set to true if this is the final time the speech service will return this particular index value.
   If the value is false, then this represents an interim result that could still be changed.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the start of the speech segment corresponding to this recognition result, as an offset in seconds on the [=session audio timeline=].</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
+  <dd>A {{double}} representing the end of the speech segment corresponding to this recognition result, as an offset in seconds on the [=session audio timeline=].</dd>
 </dl>
+
+<p class=note>
+  {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} are offsets on the [=session audio timeline=], not readings of a system clock.
+  They are therefore unaffected by audio output latency or by drift between an audio device clock and the system clock, and are identical whether recognition runs in real time or faster than real time.
+  Their precision is implementation-defined.
+</p>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
 
