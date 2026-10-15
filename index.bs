@@ -531,9 +531,8 @@ following steps:
     permission to use=] "`microphone`" is [=permission/"denied"=]:
     1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
     1. Abort these steps.
-1. Establish the recognition session's <dfn>session audio timeline</dfn>, which measures elapsed audio duration in seconds starting at `0.0` and advances with the duration of each audio frame consumed (including silence produced while a source track is muted or disabled):
-    1. If |audioTrack| is provided, begin consuming audio from |audioTrack| immediately, buffering frames if the recognition service is not yet ready, such that `0.0` on the [=session audio timeline=] corresponds to the first audio frame delivered by |audioTrack| after the algorithm was invoked.
-    1. Otherwise, begin consuming audio from the microphone, such that `0.0` on the [=session audio timeline=] corresponds to the first audio frame captured after permission was granted.
+1. Begin consuming audio from the audio source (the {{MediaStreamTrack}} if one was provided, or the microphone otherwise), buffering frames if the recognition service is not yet ready.
+    This establishes the recognition session's <dfn>session audio timeline</dfn>, which measures elapsed audio duration in seconds starting at `0.0` at the first audio frame consumed and advancing with the duration of each subsequent audio frame consumed.
 1. Once the system is successfully listening to the recognition, queue a task to
     [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
