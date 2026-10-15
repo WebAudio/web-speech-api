@@ -384,7 +384,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. If |audioTrack|'s {{MediaStreamTrack/readyState}} attribute is NOT
         `"live"`, throw an {{InvalidStateError}} and abort these steps.
     1. Let |requestMicrophonePermission| be `false`.
-    1. Run the [=start session algorithm=] with |requestMicrophonePermission|.
+    1. Run the [=start session algorithm=] with |requestMicrophonePermission| and |audioTrack|.
   </dd>
 
   <dt><dfn method for=SpeechRecognition>stop()</dfn> method</dt>
@@ -510,7 +510,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     - Resolve <var>promise</var> with <var>status</var>.
 
 When the <dfn>start session algorithm</dfn> with
-|requestMicrophonePermission| is invoked, the user agent MUST run the
+|requestMicrophonePermission| and |audioTrack| (if provided) is invoked, the user agent MUST run the
 following steps:
 
 1. If the [=current settings object=]'s [=relevant global object=]'s
@@ -531,6 +531,9 @@ following steps:
     permission to use=] "`microphone`" is [=permission/"denied"=]:
     1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
     1. Abort these steps.
+1. Establish the recognition session's <dfn>session audio timeline</dfn>, which measures elapsed audio duration in seconds starting at `0.0` and advances with the duration of each audio frame consumed (including silence produced while a source track is muted or disabled):
+    1. If |audioTrack| is provided, begin consuming audio from |audioTrack| immediately, buffering frames if the recognition service is not yet ready, such that `0.0` on the [=session audio timeline=] corresponds to the first audio frame delivered by |audioTrack| after the algorithm was invoked.
+    1. Otherwise, begin consuming audio from the microphone, such that `0.0` on the [=session audio timeline=] corresponds to the first audio frame captured after permission was granted.
 1. Once the system is successfully listening to the recognition, queue a task to
     [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
 
@@ -670,17 +673,16 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
   If the value is false, then this represents an interim result that could still be changed.</dd>
 
   <dt><dfn attribute for=SpeechRecognitionResult>speechStartTime</dfn> attribute</dt>
-  <dd>A {{double}} representing the start of the speech segment corresponding to this recognition result, as an offset in seconds on the recognition session's audio timeline.
-  The origin of that timeline (0.0 seconds) is the position of the source audio at the moment the session began consuming it.</dd>
+  <dd>A {{double}} representing the start of the speech segment corresponding to this recognition result, as an offset in seconds on the [=session audio timeline=].</dd>
 
   <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
-  <dd>A {{double}} representing the end of the speech segment corresponding to this recognition result, as an offset in seconds on the same timeline as {{SpeechRecognitionResult/speechStartTime}}.</dd>
+  <dd>A {{double}} representing the end of the speech segment corresponding to this recognition result, as an offset in seconds on the [=session audio timeline=].</dd>
 </dl>
 
 <p class=note>
-  {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} are offsets on the recognition session's audio timeline, not readings of a system clock.
+  {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} are offsets on the [=session audio timeline=], not readings of a system clock.
   They are therefore unaffected by audio output latency or by drift between an audio device clock and the system clock, and are identical whether recognition runs in real time or faster than real time.
-  Their precision is implementation-defined and is in practice bounded by the frame size of the underlying recognizer.
+  Their precision is implementation-defined.
 </p>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
