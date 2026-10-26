@@ -369,7 +369,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     Start the speech recognition process, directly from a microphone on the device.
     When invoked, run the following steps:
 
-    1. Let |requestMicrophonePermission| be a boolan variable set to to `true`.
+    1. Let |requestMicrophonePermission| be a boolean variable set to `true`.
     1. Run the [=start session algorithm=] with |requestMicrophonePermission|.
   </dd>
 
@@ -949,7 +949,7 @@ interface SpeechSynthesisVoice {
   <dt><dfn method for=SpeechSynthesis>getVoices()</dfn> method</dt>
   <dd>This method returns the available voices.
   It is user agent dependent which voices are available.
-  If there are no voices available, or if the the list of available voices is not yet known (for example: server-side synthesis where the list is determined asynchronously),
+  If there are no voices available, or if the list of available voices is not yet known (for example: server-side synthesis where the list is determined asynchronously),
   then this method must return a SpeechSynthesisVoiceList of length zero.</dd>
 </dl>
 
