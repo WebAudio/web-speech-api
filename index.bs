@@ -287,6 +287,9 @@ interface SpeechRecognition : EventTarget {
     attribute unsigned long maxAlternatives;
     attribute boolean processLocally;
     attribute ObservableArray<SpeechRecognitionPhrase> phrases;
+    attribute SpeechRecognitionDiarization diarization;
+    attribute unsigned long minSpeakers;
+    attribute unsigned long maxSpeakers;
 
     // methods to drive the speech interaction
     undefined start();
@@ -316,10 +319,17 @@ enum SpeechRecognitionQuality {
   "conversation"
 };
 
+enum SpeechRecognitionDiarization {
+  "none",
+  "speaker-turns",
+  "speaker-labels"
+};
+
 dictionary SpeechRecognitionOptions {
   required sequence<DOMString> langs;
   boolean processLocally = false;
   SpeechRecognitionQuality quality = "command";
+  SpeechRecognitionDiarization diarization = "none";
 };
 
 enum SpeechRecognitionErrorCode {
@@ -330,7 +340,8 @@ enum SpeechRecognitionErrorCode {
     "not-allowed",
     "service-not-allowed",
     "language-not-supported",
-    "phrases-not-supported"
+    "phrases-not-supported",
+    "diarization-not-supported"
 };
 
 enum SpeechRecognitionAvailabilityStatus {
@@ -367,6 +378,8 @@ interface SpeechRecognitionResult {
     readonly attribute boolean isFinal;
     readonly attribute double speechStartTime;
     readonly attribute double speechEndTime;
+    readonly attribute boolean speakerChanged;
+    readonly attribute DOMString? speaker;
 };
 
 // A collection of responses (used in continuous mode)
@@ -472,6 +485,23 @@ interface SpeechRecognitionPhrase {
   <dd>
     The getter steps are to return the value of {{SpeechRecognition/[[phrases]]}}.
   </dd>
+
+  <dt><dfn attribute for=SpeechRecognition>diarization</dfn> attribute</dt>
+  <dd>This attribute controls speaker diarization for the recognition session.
+  When set to `"none"`, no speaker segmentation or labeling is performed.
+  When set to `"speaker-turns"`, the recognition service <em class="rfc2119" title="MUST">MUST</em> segment speech recognition results at speaker turn boundaries, ensuring that each {{SpeechRecognitionResult}} represents speech from a single speaker.
+  When set to `"speaker-labels"`, the recognition service <em class="rfc2119" title="MUST">MUST</em> segment results at speaker turn boundaries and assign a canonical speaker label (`"1"`, `"2"`, etc.) to each result's {{SpeechRecognitionResult/speaker}} attribute.
+  The default value is `"none"`.</dd>
+
+  <dt><dfn attribute for=SpeechRecognition>minSpeakers</dfn> attribute</dt>
+  <dd>This attribute provides an advisory lower bound on the expected number of distinct speakers in the session.
+  The default value is `0` (indicating no hint provided).
+  If both {{SpeechRecognition/minSpeakers}} and {{SpeechRecognition/maxSpeakers}} are non-zero and `minSpeakers > maxSpeakers`, calling {{SpeechRecognition/start()}} <em class="rfc2119" title="MUST">MUST</em> throw a {{RangeError}} exception.</dd>
+
+  <dt><dfn attribute for=SpeechRecognition>maxSpeakers</dfn> attribute</dt>
+  <dd>This attribute sets an upper bound on the maximum number of distinct speakers to distinguish in the session.
+  The default value is `0` (indicating no limit or hint provided).
+  When set to a positive value and {{SpeechRecognition/diarization}} is `"speaker-labels"`, the speech recognition service <em class="rfc2119" title="MUST NOT">MUST NOT</em> assign speaker labels outside the range of 1 to `maxSpeakers`.</dd>
 </dl>
 
 <p class=issue>The group has discussed whether WebRTC might be used to specify selection of audio sources and remote recognizers.
@@ -664,6 +694,10 @@ following steps:
 1. If this.{{SpeechRecognition/phrases}}'s `length` is greater than 0 and the user agent does not support contextual biasing:
     1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to `phrases-not-supported` and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
     1. Abort these steps.
+1. If this.{{SpeechRecognition/minSpeakers}} is greater than 0 and this.{{SpeechRecognition/maxSpeakers}} is greater than 0 and this.{{SpeechRecognition/minSpeakers}} is greater than this.{{SpeechRecognition/maxSpeakers}}, throw a {{RangeError}} and abort these steps.
+1. If this.{{SpeechRecognition/diarization}} is NOT `"none"` and the speech recognition service does not support the requested diarization mode:
+    1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to `diarization-not-supported` and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
+    1. Abort these steps.
 1. <span id="step-start-local-availability"></span>Regardless of the value of this.{{SpeechRecognition/[[processLocally]]}}, the user agent <em class="rfc2119">MUST</em> treat an on-device language pack whose [=download masking state=] is not "unmasked" for the caller's [=storage key=] as not available for local speech recognition. If this.{{SpeechRecognition/[[processLocally]]}} is `true`, or if the user agent otherwise attempts to perform local speech recognition (for example, when remote speech recognition is not supported or not used):
     1. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}} (including when its [=download masking state=] is not "unmasked" for the caller's [=storage key=] or when a previously installed language pack was evicted and is no longer usable; see <a href="#req-download-masking">the download masking requirements</a> and <a href="#req-eviction-graceful-failure">the eviction failure requirements below</a>), or if it cannot fulfill local processing for other reasons (such as <a href="#req-runtime-resources">preventing resource exhaustion</a>):
         1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/service-not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason, which <em class="rfc2119">MUST NOT</em> reveal whether a language pack whose [=download masking state=] is not "unmasked" for the caller's [=storage key=] is installed or being downloaded.
@@ -825,12 +859,27 @@ For example, some implementations may fire <a event for=SpeechRecognition>audioe
 
   <dt><dfn attribute for=SpeechRecognitionResult>speechEndTime</dfn> attribute</dt>
   <dd>A {{double}} representing the end of the speech segment corresponding to this recognition result, as an offset in seconds on the [=session audio timeline=].</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speakerChanged</dfn> attribute</dt>
+  <dd>A boolean indicating whether the speaker for this result is different from the speaker of the preceding final result in the recognition session.
+  For the first result in a session, {{SpeechRecognitionResult/speakerChanged}} <em class="rfc2119" title="MUST">MUST</em> be `false`.
+  When {{SpeechRecognition/diarization}} is `"none"`, {{SpeechRecognitionResult/speakerChanged}} <em class="rfc2119" title="MUST">MUST</em> be `false`.</dd>
+
+  <dt><dfn attribute for=SpeechRecognitionResult>speaker</dfn> attribute</dt>
+  <dd>A {{DOMString}} identifying the speaker associated with this result, or `null` if speaker identification is disabled or undetermined.
+  When {{SpeechRecognition/diarization}} is `"speaker-labels"`, this attribute <em class="rfc2119" title="MUST">MUST</em> be set to a canonical 1-based index string (`"1"`, `"2"`, `"3"`, ...) assigned in order of speaker appearance within the recognition session.
+  When {{SpeechRecognition/diarization}} is `"none"` or `"speaker-turns"`, this attribute <em class="rfc2119" title="MUST">MUST</em> be `null`.</dd>
 </dl>
 
 <p class=note>
   {{SpeechRecognitionResult/speechStartTime}} and {{SpeechRecognitionResult/speechEndTime}} are offsets on the [=session audio timeline=], not readings of a system clock.
   They are therefore unaffected by audio output latency or by drift between an audio device clock and the system clock, and are identical whether recognition runs in real time or faster than real time.
   Their precision is implementation-defined.
+</p>
+
+<p class=note>
+  Speaker labels are scoped strictly to the recognition session and reset when a new session starts.
+  Once a {{SpeechRecognitionResult}} is finalized ({{SpeechRecognitionResult/isFinal}} is `true`), its {{SpeechRecognitionResult/speaker}} and {{SpeechRecognitionResult/speakerChanged}} attributes are immutable.
 </p>
 
 <h4 id="speechreco-resultlist">SpeechRecognitionResultList</h4>
