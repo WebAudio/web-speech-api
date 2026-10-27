@@ -45,6 +45,9 @@ Complain about:accidental-2119 yes, missing-example-ids yes
   }
 }
 </pre>
+<pre class=link-defaults>
+spec:storage; type:dfn; text:storage key
+</pre>
 
 <h2 id=introduction>Introduction</h2>
 
@@ -135,6 +138,110 @@ This does not preclude adding support for this as a future API enhancement, and 
   An example of styling the file input element can be seen at <a href="https://www.quirksmode.org/dom/inputfile.html">https://www.quirksmode.org/dom/inputfile.html</a>.
   The above recommendations are intended to reduce this risk of such attacks.</li>
 </ol>
+
+<div class="non-normative">
+
+<h3 id=on-device-model-privacy>On-Device Model Privacy Considerations</h3>
+
+<p><em>This section is non-normative.</em></p>
+
+<h4 id="on-device-model-privacy-availability">Language Pack Availability</h4>
+
+For on-device speech recognition, the exact download status of language packs can present a fingerprinting vector. How many bits this vector provides depends on the options provided to {{SpeechRecognition/available()}} or {{SpeechRecognition/install()}}, and how they influence the download (e.g., if different language packs have different availability statuses).
+
+<h5 id="on-device-model-privacy-availability-masking">Download Masking</h5>
+
+To prevent cross-origin fingerprinting and site collusion, the specification requires user agents to partition language pack availability by [=storage key=] and mask the current download status by returning {{"downloadable"}} from {{SpeechRecognition/available()}} by default, even if the underlying language pack is {{"available"}} or {{"downloading"}} on the user's device (see <a href="#req-download-masking">the download masking requirements</a> for the [=download masking state=] under {{SpeechRecognition/available()}} and <a href="#step-availability-masking">this step</a> of the [=availability algorithm=]).
+
+Because the [=download masking state=] for a given (<var>options</var>, [=storage key=]) tuple is only unmasked after a web page within that [=storage key=] explicitly calls {{SpeechRecognition/install()}} (see <a href="#step-install-unmask">this step</a> of {{SpeechRecognition/install()}})—and because {{SpeechRecognition/start()}} also treats masked language packs as unavailable for local speech recognition (see <a href="#step-start-local-availability">this step</a> of the [=start session algorithm=])—web pages only gain access to the true download status after taking a more costly action, such as consuming a user activation or triggering a user permission prompt (see <a href="#on-device-model-privacy-availability-installation">Installation-Time Friction</a>).
+
+The requirement to <a href="#req-download-masking">clear the download masking state</a> whenever other storage for that [=storage key=] is cleared prevents the unmasked state from persisting across storage resets.
+
+<h5 id="on-device-model-privacy-availability-installation">Installation-Time Friction</h5>
+
+The mitigation described in <a href="#on-device-model-privacy-availability-masking">Download Masking</a> works against attempts to silently fingerprint using {{SpeechRecognition/available()}}. The specification also contains requirements to prevent {{SpeechRecognition/install()}} from being easily used for fingerprinting, by introducing friction:
+
+*   The {{SpeechRecognition/install()}} method both requires and consumes [=transient activation=] when, as far as the calling web page can observe, it would initiate a download (see <a href="#step-install-transient-activation">this step</a> of the {{SpeechRecognition/install()}} algorithm).
+*   The {{SpeechRecognition/install()}} method allows the user agent to prompt the user for permission, or to implicitly reject download attempts based on previous signals (such as an observed pattern of abuse; see <a href="#step-install-download-permission">this step</a> of the {{SpeechRecognition/install()}} algorithm).
+*   Access to {{SpeechRecognition/install()}} and {{SpeechRecognition/available()}} is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which means that only top-level origins and their delegates can use these methods.
+
+Additionally, initiating the download process via {{SpeechRecognition/install()}} is more or less a one-time operation for a given language. The availability status will only transition from {{"downloadable"}} to {{"downloading"}} to {{"available"}} via these guarded installation operations. That is, while {{SpeechRecognition/install()}} can be used to read some of these fingerprinting bits (by observing the resolution of its promise and subsequent calls to {{SpeechRecognition/available()}}), doing so will effectively "destroy" those bits by changing the state.
+
+(For details on cases where downloading might happen more than once, and how privacy and security are preserved in those cases, see <a href="#on-device-model-privacy-availability-cancelation">Download Cancelation</a>, <a href="#on-device-model-privacy-availability-eviction">Download Eviction</a>, and <a href="#on-device-model-security-disk-space">Disk Space for Language Packs</a>.)
+
+<h5 id="on-device-model-privacy-availability-cancelation">Download Cancelation</h5>
+
+Because the availability of a language pack is strictly partitioned by [=storage key=] (see <a href="#on-device-model-privacy-availability-masking">Download Masking</a>), a web page can only observe the download state within its own partition.
+
+Therefore, if a user agent cancels an ongoing download due to page-controlled actions (e.g., navigation, page unload, or an iframe being destroyed) as permitted by <a href="#req-download-cancelation">the cancelation rules</a> for {{SpeechRecognition/install()}}, the resulting change in state (e.g., reverting from {{"downloading"}} to {{"downloadable"}}) is only visible to that specific [=storage key=], as long as canceling does not alter the availability status observable by other [=storage keys=]. This prevents the cancelation behavior from being used as a cross-origin fingerprinting vector.
+
+<h5 id="on-device-model-privacy-availability-eviction">Download Eviction</h5>
+
+Another ingredient in ensuring that websites cannot toggle the availability state back and forth is to ensure that user agents don't use a quota-based eviction system for downloaded language packs that web pages can indirectly control. For example, if a user agent evicted less-recently-used language packs when new ones are installed, a web page could trigger such evictions to toggle the state of a target language pack.
+
+To avoid this, <a href="#req-download-eviction">the download eviction rules</a> for {{SpeechRecognition/install()}} discourage systems that allow web pages to control the eviction of downloaded language packs, including via indirect triggers such as further subsequent downloads. One way to fulfill this is to never evict downloaded material in response to web page-initiated storage pressure, instead refusing to download new material (e.g., {{SpeechRecognition/install()}} resolving to `false`) if doing so would cause storage pressure.
+
+Evicting downloads in response to user-controlled actions (e.g., via a browser settings UI) is not problematic.
+
+<h4 id="on-device-model-privacy-sensitive-language">Sensitive Language Information</h4>
+
+Even if fingerprinting risks from availability status are mitigated, knowing a user has downloaded a specific language pack (e.g., for a minority language) can be sensitive.
+
+For this reason, on top of installation-time friction, <a href="#step-install-fake-download">this step</a> of the {{SpeechRecognition/install()}} algorithm allows user agents to artificially fake a download (e.g., by adding a delay to the resolution of the {{SpeechRecognition/install()}} promise while reporting {{"downloading"}} for that [=storage key=]) if they believe it would be helpful for privacy reasons, instead of having {{SpeechRecognition/install()}} resolve instantly if the language pack is already present. This provides plausible deniability: if {{SpeechRecognition/install()}} takes a few seconds to resolve `true`, it could be a fake delay or a quick real download.
+
+Such fake delays are not foolproof but offer some privacy benefit, especially when combined with other mitigations like prompts.
+
+<h4 id="on-device-model-privacy-model-version">Model Version</h4>
+
+The specific version or behavior of an on-device speech recognition model can also be a fingerprinting vector. This API does not expose model versions directly.
+
+The best way to prevent the model version from becoming a fingerprinting vector is to tie it to the user agent's version, such that the model's version (and behavior) only updates alongside already-exposed information (like the User-Agent string). Accordingly, <a href="#req-model-version">the model version rules</a> under {{SpeechRecognition/available()}} encourage limiting the number of possible model versions that a single user agent version can be paired with when determining if a language pack is {{"available"}} via {{SpeechRecognition/available()}}. This might involve not providing model updates to older user agent versions or ignoring already-downloaded models below a minimum version threshold after a user agent update (instead, {{SpeechRecognition/available()}} might report {{"downloadable"}} for a newer version).
+
+There is a tradeoff: aggressively locking new user agent versions to new model versions can increase transitions between {{"available"}} and {{"downloadable"}}. This can be mitigated by allowing older models with newer user agent versions while a new model downloads, keeping the status {{"available"}} but briefly allowing identification of users with older-model/newer-user-agent combinations.
+
+<h4 id="on-device-model-privacy-user-input">User Input and Speech Data</h4>
+
+Speech data is inherently sensitive. <a href="#req-user-input-training">The user input retention rules</a> under {{SpeechRecognition/processLocally}} prohibit implementations from training or fine-tuning on-device speech recognition models on user speech input obtained through this API, or otherwise storing user speech input in a way that models can consult in the future (e.g., for personalization beyond the current session or across origins).
+
+Using user speech input in such a way would be a significant privacy leak, potentially exposing user information or information derived from interactions with one site to another.
+
+This reinforces the existing requirement in <a href="#security">Security and privacy considerations</a> against personalizing speech recognition when performing speech recognition on a {{MediaStreamTrack}}, and applies broadly to any speech processed by on-device models via this API.
+
+<h4 id="on-device-model-privacy-cloud-implementations">Cloud-Based vs. On-Device Implementations</h4>
+
+The Web Speech API can support both server-based (cloud) and client-based/embedded (on-device) recognition and synthesis. The {{SpeechRecognition/processLocally}} attribute allows developers to indicate a requirement for on-device processing.
+
+When {{SpeechRecognition/processLocally}} is `false` (the default), user speech data might be sent to a remote server for processing. Web developers need to be aware of this possibility and the associated privacy implications if they do not explicitly request local processing, and <a href="#req-cloud-transparency">user agents are encouraged to be transparent</a> with users about where speech processing occurs.
+
+When {{SpeechRecognition/processLocally}} is `true`, the considerations in this "On-Device Model Privacy Considerations" section are paramount.
+
+<h3 id=on-device-model-security>On-Device Model Security Considerations</h3>
+
+<p><em>This section is non-normative.</em></p>
+
+<h4 id="on-device-model-security-disk-space">Disk Space for Language Packs</h4>
+
+Downloading language packs for on-device speech recognition via {{SpeechRecognition/install()}} could use significant amounts of the user's disk space.
+
+As specified in <a href="#req-disk-space">the storage pressure rules</a> for {{SpeechRecognition/install()}}, in the event of storage pressure, user agents are expected to balance the utility of on-device speech recognition with the disk space its language packs take up—possibly by having {{SpeechRecognition/install()}} resolve to `false` for new downloads or by freeing up disk space in other ways, while remaining mindful of the privacy impacts discussed in <a href="#on-device-model-privacy-availability-eviction">Download Eviction</a> and potentially involving the user via download-time prompts or a browser UI for managing downloaded language packs.
+
+If a previously installed language pack is evicted (e.g., by the user or due to extreme storage pressure) while it might be in use or expected to be available, ongoing sessions or subsequent sessions while the model remains in memory might continue to work; however, once the evicted language pack is no longer usable, attempts to use it (e.g., via {{SpeechRecognition/start()}} with {{SpeechRecognition/lang}} set to that language and {{SpeechRecognition/processLocally}} set to `true`) are expected to <a href="#req-eviction-graceful-failure">fail gracefully</a>. This might involve {{SpeechRecognition/available()}} returning {{"downloadable"}} (or {{"unavailable"}} if no longer supported), and {{SpeechRecognition/start()}} firing a {{SpeechRecognitionErrorEvent}} with an appropriate error code like {{SpeechRecognitionErrorCode/service-not-allowed}} or {{SpeechRecognitionErrorCode/language-not-supported}}.
+
+<h4 id="on-device-model-security-runtime-resources">Runtime Shared Resources</h4>
+
+On-device speech recognition can consume significant runtime resources like CPU, memory, and potentially specialized hardware accelerators.
+
+As described in <a href="#req-runtime-resources">the runtime resource requirements</a> of the [=start session algorithm=], user agents are expected to ensure that one web page's use of on-device speech recognition does not overly interfere with another web page's use of the API, another web page's general operation, or overall system stability.
+
+This specification does not mandate any particular mitigation strategy, but possible approaches include queuing requests, rate limiting, or detecting abusive behavior, and failing speech recognition operations (e.g., by firing a {{SpeechRecognitionErrorEvent}} with {{SpeechRecognitionErrorCode/service-not-allowed}}) when necessary to prevent resource exhaustion or instability.
+
+<h4 id="on-device-model-security-os-models">OS-Provided Models</h4>
+
+One implementation strategy for on-device speech recognition is to delegate to models or capabilities provided by the underlying operating system. This can offer benefits like a consistent user experience and efficient resource usage.
+
+However, this approach comes with the usual considerations of exposing OS capabilities to the web. As specified in <a href="#req-os-models">the requirements for OS-provided models</a> under {{SpeechRecognition/processLocally}}, user agents still need to ensure that all privacy and security requirements of this specification are met when using OS-provided models, even if the user agent has less control over the model's behavior. Particularly notable requirements to watch out for are <a href="#req-user-input-training">not training on user speech input</a> (see <a href="#on-device-model-privacy-user-input">User Input and Speech Data</a>) and <a href="#req-runtime-resources">fair and stable resource sharing</a> (see <a href="#on-device-model-security-runtime-resources">Runtime Shared Resources</a>).
+
+</div>
 
 <h2 id="api_description">API Description</h2>
 
@@ -347,6 +454,15 @@ interface SpeechRecognitionPhrase {
   <dd>This attribute, when set to true, indicates a requirement that the speech recognition process <em class="rfc2119" title="MUST">MUST</em> be performed locally on the user's device.
   If set to false, the user agent can choose between local and remote processing.
   The default value is false.
+  <p id="req-cloud-transparency">
+    When {{SpeechRecognition/processLocally}} is `false`, user speech data might be sent to a remote server for processing; user agents <em class="rfc2119">SHOULD</em> be transparent with users about where speech processing occurs (see <a href="#on-device-model-privacy-cloud-implementations">Cloud-Based vs. On-Device Implementations</a>).
+  </p>
+  <p id="req-user-input-training">
+    Regardless of the value of {{SpeechRecognition/processLocally}}, implementations <em class="rfc2119">MUST NOT</em> train or fine-tune on-device speech recognition models on user speech input obtained through this API, or otherwise store user speech input in a way that models can consult in the future (e.g., for personalization beyond the current session or across origins; see <a href="#on-device-model-privacy-user-input">User Input and Speech Data</a>).
+  </p>
+  <p id="req-os-models">
+    When delegating on-device speech recognition to models or capabilities provided by the underlying operating system, user agents <em class="rfc2119">MUST</em> ensure that all privacy and security requirements of this specification are met, even if the user agent has less control over the model's behavior (see <a href="#on-device-model-security-os-models">OS-Provided Models</a>).
+  </p>
   </dd>
 
   <dt><dfn attribute for=SpeechRecognition>phrases</dfn> attribute</dt>
@@ -406,6 +522,16 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     The {{SpeechRecognition/available}} method returns a {{Promise}} that resolves to a {{SpeechRecognitionAvailabilityStatus}} indicating the recognition availability matching the {{SpeechRecognitionOptions}} argument, including the requested {{SpeechRecognitionOptions/quality}} level.
     Access to this method is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which has a [=policy-controlled feature/default allowlist=] of <code>[=default allowlist/'self'=]</code>.
 
+    <p id="req-download-masking">
+      To prevent cross-origin fingerprinting and site collusion, user agents <em class="rfc2119">MUST</em> partition on-device language pack availability by [=storage key=]. User agents <em class="rfc2119">MUST</em> mask the current download status by returning {{"downloadable"}} from {{SpeechRecognition/available()}} by default when {{SpeechRecognitionOptions/processLocally}} is `true`, even if the actual underlying language pack is {{"available"}} or {{"downloading"}} on the user's device (see <a href="#step-availability-masking">this step</a> of the [=availability algorithm=] and <a href="#on-device-model-privacy-availability-masking">Download Masking</a>).
+      This <dfn>download masking state</dfn> is established for each (<var>options</var>, [=storage key=]) tuple (specifically, per language in {{SpeechRecognitionOptions/langs}} and {{SpeechRecognitionOptions/quality}} of <var>options</var> for a given [=storage key=], ignoring {{SpeechRecognitionOptions/processLocally}}). The user agent <em class="rfc2119">MUST</em> only set the state to "unmasked" for a specific (<var>options</var>, [=storage key=]) tuple after a web page within that key explicitly calls {{SpeechRecognition/install()}} with a given set of options, and that call either successfully initiates (or joins an ongoing) download or resolves to `true` (indicating the language pack is ready; see <a href="#step-install-unmask">this step</a> of {{SpeechRecognition/install()}}).
+      Implementations <em class="rfc2119">MUST</em> ensure that this [=storage key=]-based [=download masking state=] is cleared whenever other storage for that [=storage key=] is cleared.
+    </p>
+
+    <p id="req-model-version">
+      User agents <em class="rfc2119">SHOULD</em> limit the number of possible on-device model versions that a single user agent version can be paired with when determining if a language pack is {{"available"}} via {{SpeechRecognition/available()}} (for example, by tying model updates to user agent updates or ignoring already-downloaded models below a minimum version threshold after a user agent update and reporting {{"downloadable"}} for a newer version instead; see <a href="#on-device-model-privacy-model-version">Model Version</a>).
+    </p>
+
     When invoked, run these steps:
     1. Let <var>promise</var> be <a>a new promise</a>.
     1. Run the <a>availability algorithm</a> with <var>options</var> and <var>promise</var>.
@@ -418,6 +544,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     It returns a {{Promise}} that resolves to a {{boolean}}.
     The promise resolves to `true` when all installation attempts for requested and supported languages succeed (or the languages were already installed).
     The promise resolves to `false` if `options.langs` is empty, if not all of the requested languages are supported, or if any installation attempt for a supported language fails.
+    The promise is rejected with a {{NotAllowedError}} if the call would initiate a download but the calling {{Window}} does not have [=transient activation=].
     Access to this method is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which has a [=policy-controlled feature/default allowlist=] of <code>[=default allowlist/'self'=]</code>.
 
     When invoked, run these steps:
@@ -426,12 +553,18 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     1. If {{SpeechRecognitionOptions/langs}} of <var>options</var> is an empty sequence, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.
     1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}}, abort these steps, returning <var>promise</var>.
     1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.
+    1. <span id="step-install-transient-activation"></span>If {{SpeechRecognition/available()}} would resolve to {{"downloadable"}} for <var>options</var> (evaluated as if {{SpeechRecognitionOptions/processLocally}} of <var>options</var> were <code>true</code>), that is, if, as far as the calling web page can observe, this call would initiate a download, then:
+        1. If the [=current settings object=]'s [=relevant global object=] does not have [=transient activation=], reject <var>promise</var> with a {{NotAllowedError}}, abort these steps, returning <var>promise</var>.
+        1. [=Consume user activation=] given the [=current settings object=]'s [=relevant global object=].
+
+        <p class=note>
+          Note: Because {{SpeechRecognition/available()}} is subject to [=download masking state=] rules, this check is based on the masked availability status rather than on the true download status. As a result, whether {{SpeechRecognition/install()}} requires [=transient activation=] does not reveal the true download status to a web page for which it is still masked.
+        </p>
     1. [=In parallel=], run the following steps:
-        1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor.
-            <p class=note>
-              Note: The user agent can prompt the user for explicit permission to download the on-device speech recognition language pack.
-            </p>
-        1. Wait for the download of all languages specified by {{SpeechRecognitionOptions/langs}} of <var>options</var> to either succeed or fail.
+        1. <span id="step-install-download-permission"></span>The user agent <em class="rfc2119">MAY</em> prompt the user for explicit permission to download the on-device speech recognition language pack(s), or <em class="rfc2119">MAY</em> decline to initiate the download based on implicit signals (such as an observed pattern of abuse; see <a href="#on-device-model-privacy-availability-installation">Installation-Time Friction</a>) or storage pressure. <span id="req-disk-space"></span>In the event of storage pressure, user agents <em class="rfc2119">SHOULD</em> balance the utility of on-device speech recognition with the disk space its language packs take up (possibly by declining new downloads or freeing up disk space in other ways, subject to <a href="#req-download-eviction">the eviction requirements below</a>; see <a href="#on-device-model-security-disk-space">Disk Space for Language Packs</a>), and <em class="rfc2119">MAY</em> involve the user in these decisions (e.g., via the download-time permission prompt or a browser UI for managing downloaded language packs). If the download is not permitted, [=queue a task=] on the [=relevant global object=]'s [=task queue=] to resolve <var>promise</var> with <code>false</code>, and abort these steps.
+        1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor (if not already installed or downloading).
+        1. <span id="step-install-unmask"></span>If the download was successfully initiated (or the language pack is already installed or downloading) for every <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, set the [=download masking state=] for (<var>options</var>, [=storage key=]) to "unmasked".
+        1. <span id="step-install-fake-download"></span>Wait for the download of all languages specified by {{SpeechRecognitionOptions/langs}} of <var>options</var> to either succeed or fail. User agents <em class="rfc2119">MAY</em> artificially fake a download (e.g., by adding a delay before resolving <var>promise</var>) if they believe it would be helpful for privacy reasons, instead of resolving instantly if the language pack is already present (see <a href="#on-device-model-privacy-sensitive-language">Sensitive Language Information</a>). During such a fake download, the user agent <em class="rfc2119">MUST</em> report the availability status for that [=storage key=] as {{"downloading"}} (and treat the language pack as not yet installed for other purposes observable by that [=storage key=], including in the [=start session algorithm=] and the {{SpeechRecognitionOptions/processLocally}} `false` branch of the [=availability algorithm=]) so that the web page cannot distinguish a fake delay from a real download.
         1. If the download of all those languages succeeded, let <var>result</var> be <code>true</code>, otherwise let <var>result</var> be <code>false</code>.
         1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to resolve <var>promise</var> with <var>result</var>.
             <p class="note">
@@ -439,8 +572,16 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
             </p>
     1. Return <var>promise</var>.
         <p class=note>
-          {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is not used in this algorithm.
+          The value of {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is not used in this algorithm: {{SpeechRecognition/install()}} always concerns on-device language packs, which is why the availability check above treats it as <code>true</code>.
         </p>
+
+    <p id="req-download-cancelation">
+      User agents <em class="rfc2119">MAY</em> cancel ongoing language pack downloads when the requesting document is destroyed or navigated away from, in accordance with their standard resource management policies, provided that doing so does not change the availability status observable by any other [=storage key=] (e.g., not canceling an underlying download that another [=storage key=] is also waiting on; see <a href="#on-device-model-privacy-availability-cancelation">Download Cancelation</a>).
+    </p>
+
+    <p id="req-download-eviction">
+      User agents <em class="rfc2119">SHOULD NOT</em> implement systems which allow web pages to control the eviction of downloaded language packs, including via indirect triggers such as further subsequent downloads (for example, quota-based or least-recently-used eviction in response to web page-initiated storage pressure; see <a href="#on-device-model-privacy-availability-eviction">Download Eviction</a>). Evicting downloads in response to user-controlled actions (e.g., via a browser settings UI) is permitted.
+    </p>
   </dd>
 
 </dl>
@@ -484,7 +625,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 1. If any <var>lang</var> in <var>langs</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}} and abort these steps.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `false`:
     1. If <var>langs</var> is an empty sequence, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/unavailable}}.
-    1. Else if speech recognition (which may be remote) is available for all <var>language</var> in <var>langs</var>, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/available}}.
+    1. Else if speech recognition (which may be remote, or on-device if its [=download masking state=] is "unmasked" for the caller's [=storage key=]) is available for all <var>language</var> in <var>langs</var>, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/available}}.
     1. Else, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/unavailable}}.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `true`:
       <ol type=a>
@@ -495,10 +636,11 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
             <li>For each <var>language</var> in <var>langs</var>:
               <ol>
                 <li>Let <var>currentLanguageStatus</var>.</li>
-                <li>If on-device speech recognition for <var>language</var> is installed, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/available}}.</li>
-                <li>Else if on-device speech recognition for <var>language</var> is currently being downloaded, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloading}}.</li>
-                <li>Else if on-device speech recognition for <var>language</var> is supported by the user agent but not yet installed, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloadable}}.</li>
+                <li>If on-device speech recognition for <var>language</var> matching the requested {{SpeechRecognitionOptions/quality}} of <var>options</var> is installed (taking into account <a href="#req-model-version">model version limits</a>) and no fake download is in progress for the caller's [=storage key=] per <a href="#step-install-fake-download">the `install()` algorithm</a>, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/available}}.</li>
+                <li>Else if on-device speech recognition for <var>language</var> matching the requested {{SpeechRecognitionOptions/quality}} of <var>options</var> is currently being downloaded (including a fake download for the caller's [=storage key=] per <a href="#step-install-fake-download">the `install()` algorithm</a>), set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloading}}.</li>
+                <li>Else if on-device speech recognition for <var>language</var> matching the requested {{SpeechRecognitionOptions/quality}} of <var>options</var> is supported by the user agent but not yet installed, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloadable}}.</li>
                 <li>Else (on-device speech recognition for <var>language</var> is not supported), set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/unavailable}}.</li>
+                <li><span id="step-availability-masking"></span>If <var>currentLanguageStatus</var> is {{SpeechRecognitionAvailabilityStatus/available}} or {{SpeechRecognitionAvailabilityStatus/downloading}}, and the [=download masking state=] for (<var>options</var>, [=storage key=]) is not "unmasked" for <var>language</var>, set <var>currentLanguageStatus</var> to {{SpeechRecognitionAvailabilityStatus/downloadable}}.</li>
                 <li>If <var>currentLanguageStatus</var> comes after <var>finalStatus</var> in the ordered list `[{{SpeechRecognitionAvailabilityStatus/available}}, {{SpeechRecognitionAvailabilityStatus/downloading}}, {{SpeechRecognitionAvailabilityStatus/downloadable}}, {{SpeechRecognitionAvailabilityStatus/unavailable}}]`, set <var>finalStatus</var> to <var>currentLanguageStatus</var>.</li>
               </ol>
             </li>
@@ -522,9 +664,9 @@ following steps:
 1. If this.{{SpeechRecognition/phrases}}'s `length` is greater than 0 and the user agent does not support contextual biasing:
     1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to `phrases-not-supported` and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
     1. Abort these steps.
-1. If this.{{SpeechRecognition/[[processLocally]]}} is `true`:
-    1. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}}, or if it cannot fulfill the local processing requirement for other reasons:
-        1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/service-not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason.
+1. <span id="step-start-local-availability"></span>Regardless of the value of this.{{SpeechRecognition/[[processLocally]]}}, the user agent <em class="rfc2119">MUST</em> treat an on-device language pack whose [=download masking state=] is not "unmasked" for the caller's [=storage key=] as not available for local speech recognition. If this.{{SpeechRecognition/[[processLocally]]}} is `true`, or if the user agent otherwise attempts to perform local speech recognition (for example, when remote speech recognition is not supported or not used):
+    1. If the user agent determines that local speech recognition is not available for this.{{SpeechRecognition/lang}} (including when its [=download masking state=] is not "unmasked" for the caller's [=storage key=] or when a previously installed language pack was evicted and is no longer usable; see <a href="#req-download-masking">the download masking requirements</a> and <a href="#req-eviction-graceful-failure">the eviction failure requirements below</a>), or if it cannot fulfill local processing for other reasons (such as <a href="#req-runtime-resources">preventing resource exhaustion</a>):
+        1. [=Queue a task=] to [=fire an event=] named <a event for=SpeechRecognition>error</a> at [=this=] using {{SpeechRecognitionErrorEvent}} with its {{SpeechRecognitionErrorEvent/error}} attribute initialized to {{SpeechRecognitionErrorCode/service-not-allowed}} and its {{SpeechRecognitionErrorEvent/message}} attribute set to an implementation-defined string detailing the reason, which <em class="rfc2119">MUST NOT</em> reveal whether a language pack whose [=download masking state=] is not "unmasked" for the caller's [=storage key=] is installed or being downloaded.
         1. Abort these steps.
 1. Set {{[[started]]}} to `true`.
 1. If |requestMicrophonePermission| is `true` and [=request
@@ -535,6 +677,13 @@ following steps:
     This establishes the recognition session's <dfn>session audio timeline</dfn>, which measures elapsed audio duration in seconds starting at `0.0` at the first audio frame consumed and advancing with the duration of each subsequent audio frame consumed.
 1. Once the system is successfully listening to the recognition, queue a task to
     [=fire an event=] named <a event for=SpeechRecognition>start</a> at [=this=].
+
+<p id="req-eviction-graceful-failure">
+  If a previously installed language pack is evicted (e.g., by the user or due to extreme storage pressure) while it might be in use or expected to be available, ongoing sessions or subsequent sessions while the model remains in memory <em class="rfc2119">MAY</em> continue to work; once the evicted language pack is no longer usable, attempts to use it (e.g., via {{SpeechRecognition/start()}} with {{SpeechRecognition/lang}} set to that language and {{SpeechRecognition/processLocally}} set to `true`) <em class="rfc2119">SHOULD</em> fail gracefully (such as {{SpeechRecognition/available()}} returning {{"downloadable"}} (or {{"unavailable"}} if no longer supported), and {{SpeechRecognition/start()}} firing a {{SpeechRecognitionErrorEvent}} with an appropriate error code like {{SpeechRecognitionErrorCode/service-not-allowed}} (or {{SpeechRecognitionErrorCode/language-not-supported}} if no longer supported); see <a href="#on-device-model-security-disk-space">Disk Space for Language Packs</a>).
+</p>
+<p id="req-runtime-resources">
+  User agents <em class="rfc2119">SHOULD</em> ensure that one web page's use of on-device speech recognition does not overly interfere with another web page's use of the API, or another web page's general operation, or the overall system stability (for example, by queuing requests, rate limiting, or detecting abusive behavior; see <a href="#on-device-model-security-runtime-resources">Runtime Shared Resources</a>). If necessary to prevent resource exhaustion or instability, the user agent <em class="rfc2119">MAY</em> cause speech recognition operations to fail (e.g., by firing a {{SpeechRecognitionErrorEvent}} with {{SpeechRecognitionErrorCode/service-not-allowed}}). On-device speech recognition sessions are also subject to <a href="#req-user-input-training">the user input retention rules</a> and <a href="#req-os-models">the OS-provided model rules</a> under {{SpeechRecognition/processLocally}}.
+</p>
 
 <h4 id="speechreco-events">SpeechRecognition Events</h4>
 
