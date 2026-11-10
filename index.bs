@@ -479,6 +479,9 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
 
 <h4 id="speechreco-methods">SpeechRecognition Methods</h4>
 
+<p>The <dfn>speech recognition task source</dfn> is a [=task source=] used to settle promises for
+{{SpeechRecognition/available()}} and {{SpeechRecognition/install()}}.</p>
+
 <dl>
   <dt><dfn method for=SpeechRecognition>start()</dfn> method</dt>
   <dd>
@@ -533,8 +536,9 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     </p>
 
     When invoked, run these steps:
+    1. Let <var>global</var> be the [=current global object=].
     1. Let <var>promise</var> be <a>a new promise</a>.
-    1. Run the <a>availability algorithm</a> with <var>options</var> and <var>promise</var>.
+    1. Run the <a>availability algorithm</a> with <var>options</var>, <var>promise</var>, and <var>global</var>.
     1. Return <var>promise</var>.
   </dd>
 
@@ -548,25 +552,28 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
     Access to this method is gated behind the [=policy-controlled feature=] "on-device-speech-recognition", which has a [=policy-controlled feature/default allowlist=] of <code>[=default allowlist/'self'=]</code>.
 
     When invoked, run these steps:
+    1. Let <var>global</var> be the [=current global object=].
+    1. Let <var>document</var> be <var>global</var>'s [=associated Document=].
     1. Let <var>promise</var> be <a>a new promise</a>.
-    1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], reject <var>promise</var> with an {{InvalidStateError}}, abort these steps, returning <var>promise</var>.
+    1. If <var>document</var> is not [=fully active=], reject <var>promise</var> with an {{InvalidStateError}}, abort these steps, returning <var>promise</var>.
     1. If {{SpeechRecognitionOptions/langs}} of <var>options</var> is an empty sequence, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.
     1. If any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}}, abort these steps, returning <var>promise</var>.
+    1. If <var>document</var> is not [=allowed to use=] the "on-device-speech-recognition" [=policy-controlled feature=], reject <var>promise</var> with a {{NotAllowedError}} and return <var>promise</var>.
     1. If the on-device speech recognition language pack for any <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var> is unsupported, resolve <var>promise</var> with <code>false</code>, abort these steps, returning <var>promise</var>.
     1. <span id="step-install-transient-activation"></span>If {{SpeechRecognition/available()}} would resolve to {{"downloadable"}} for <var>options</var> (evaluated as if {{SpeechRecognitionOptions/processLocally}} of <var>options</var> were <code>true</code>), that is, if, as far as the calling web page can observe, this call would initiate a download, then:
-        1. If the [=current settings object=]'s [=relevant global object=] does not have [=transient activation=], reject <var>promise</var> with a {{NotAllowedError}}, abort these steps, returning <var>promise</var>.
-        1. [=Consume user activation=] given the [=current settings object=]'s [=relevant global object=].
+        1. If <var>global</var> does not have [=transient activation=], reject <var>promise</var> with a {{NotAllowedError}}, abort these steps, returning <var>promise</var>.
+        1. [=Consume user activation=] given <var>global</var>.
 
         <p class=note>
           Note: Because {{SpeechRecognition/available()}} is subject to [=download masking state=] rules, this check is based on the masked availability status rather than on the true download status. As a result, whether {{SpeechRecognition/install()}} requires [=transient activation=] does not reveal the true download status to a web page for which it is still masked.
         </p>
     1. [=In parallel=], run the following steps:
-        1. <span id="step-install-download-permission"></span>The user agent <em class="rfc2119">MAY</em> prompt the user for explicit permission to download the on-device speech recognition language pack(s), or <em class="rfc2119">MAY</em> decline to initiate the download based on implicit signals (such as an observed pattern of abuse; see <a href="#on-device-model-privacy-availability-installation">Installation-Time Friction</a>) or storage pressure. <span id="req-disk-space"></span>In the event of storage pressure, user agents <em class="rfc2119">SHOULD</em> balance the utility of on-device speech recognition with the disk space its language packs take up (possibly by declining new downloads or freeing up disk space in other ways, subject to <a href="#req-download-eviction">the eviction requirements below</a>; see <a href="#on-device-model-security-disk-space">Disk Space for Language Packs</a>), and <em class="rfc2119">MAY</em> involve the user in these decisions (e.g., via the download-time permission prompt or a browser UI for managing downloaded language packs). If the download is not permitted, [=queue a task=] on the [=relevant global object=]'s [=task queue=] to resolve <var>promise</var> with <code>false</code>, and abort these steps.
+        1. <span id="step-install-download-permission"></span>The user agent <em class="rfc2119">MAY</em> prompt the user for explicit permission to download the on-device speech recognition language pack(s), or <em class="rfc2119">MAY</em> decline to initiate the download based on implicit signals (such as an observed pattern of abuse; see <a href="#on-device-model-privacy-availability-installation">Installation-Time Friction</a>) or storage pressure. <span id="req-disk-space"></span>In the event of storage pressure, user agents <em class="rfc2119">SHOULD</em> balance the utility of on-device speech recognition with the disk space its language packs take up (possibly by declining new downloads or freeing up disk space in other ways, subject to <a href="#req-download-eviction">the eviction requirements below</a>; see <a href="#on-device-model-security-disk-space">Disk Space for Language Packs</a>), and <em class="rfc2119">MAY</em> involve the user in these decisions (e.g., via the download-time permission prompt or a browser UI for managing downloaded language packs). If the download is not permitted, [=queue a global task=] on the [=speech recognition task source=] given <var>global</var> to resolve <var>promise</var> with <code>false</code>, and abort these steps.
         1. For each <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, initiate the download of the on-device speech recognition language pack for <var>lang</var> matching the requested {{SpeechRecognitionOptions/quality}} level floor (if not already installed or downloading).
         1. <span id="step-install-unmask"></span>If the download was successfully initiated (or the language pack is already installed or downloading) for every <var>lang</var> in {{SpeechRecognitionOptions/langs}} of <var>options</var>, set the [=download masking state=] for (<var>options</var>, [=storage key=]) to "unmasked".
         1. <span id="step-install-fake-download"></span>Wait for the download of all languages specified by {{SpeechRecognitionOptions/langs}} of <var>options</var> to either succeed or fail. User agents <em class="rfc2119">MAY</em> artificially fake a download (e.g., by adding a delay before resolving <var>promise</var>) if they believe it would be helpful for privacy reasons, instead of resolving instantly if the language pack is already present (see <a href="#on-device-model-privacy-sensitive-language">Sensitive Language Information</a>). During such a fake download, the user agent <em class="rfc2119">MUST</em> report the availability status for that [=storage key=] as {{"downloading"}} (and treat the language pack as not yet installed for other purposes observable by that [=storage key=], including in the [=start session algorithm=] and the {{SpeechRecognitionOptions/processLocally}} `false` branch of the [=availability algorithm=]) so that the web page cannot distinguish a fake delay from a real download.
         1. If the download of all those languages succeeded, let <var>result</var> be <code>true</code>, otherwise let <var>result</var> be <code>false</code>.
-        1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to resolve <var>promise</var> with <var>result</var>.
+        1. [=Queue a global task=] on the [=speech recognition task source=] given <var>global</var> to resolve <var>promise</var> with <var>result</var>.
             <p class="note">
               Note: The <code>false</code> resolution of the Promise does not indicate the specific cause of failure. User agents are encouraged to provide more detailed information about the failure in developer tools console messages. However, this detailed error information is not exposed to the script.
             </p>
@@ -619,10 +626,12 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
   <dd>Level 3: Multi-speaker, complex vocabulary, high noise tolerance (e.g., meeting transcripts and continuous captioning).</dd>
 </dl>
 
-<p>When the  <dfn>availability algorithm</dfn> with <var>options</var> and <var>promise</var> is invoked, the user agent MUST run the following steps:
-1. If the [=current settings object=]'s [=relevant global object=]'s [=associated Document=] is NOT [=fully active=], reject <var>promise</var> with an {{InvalidStateError}} and abort these steps.
+<p>When the  <dfn>availability algorithm</dfn> with <var>options</var>, <var>promise</var>, and a {{Window}} <var>global</var> is invoked, the user agent MUST run the following steps:
+1. Let <var>document</var> be <var>global</var>'s [=associated Document=].
+1. If <var>document</var> is not [=fully active=], reject <var>promise</var> with an {{InvalidStateError}} and abort these steps.
 1. Let <var>langs</var> be {{SpeechRecognitionOptions/langs}} of <var>options</var>.
 1. If any <var>lang</var> in <var>langs</var> is not a valid [[!BCP47]] language tag, reject <var>promise</var> with a {{SyntaxError}} and abort these steps.
+1. If <var>document</var> is not [=allowed to use=] the "on-device-speech-recognition" [=policy-controlled feature=], resolve <var>promise</var> with {{SpeechRecognitionAvailabilityStatus/unavailable}} and abort these steps.
 1. If {{SpeechRecognitionOptions/processLocally}} of <var>options</var> is `false`:
     1. If <var>langs</var> is an empty sequence, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/unavailable}}.
     1. Else if speech recognition (which may be remote, or on-device if its [=download masking state=] is "unmasked" for the caller's [=storage key=]) is available for all <var>language</var> in <var>langs</var>, let <var>status</var> be {{SpeechRecognitionAvailabilityStatus/available}}.
@@ -648,7 +657,7 @@ See <a href="https://lists.w3.org/Archives/Public/public-speech-api/2012Sep/0072
           </ol>
         </li>
       </ol>
-1. [=Queue a task=] on the [=relevant global object=]'s [=task queue=] to run the following step:
+1. [=Queue a global task=] on the [=speech recognition task source=] given <var>global</var> to run the following step:
     - Resolve <var>promise</var> with <var>status</var>.
 
 When the <dfn>start session algorithm</dfn> with
